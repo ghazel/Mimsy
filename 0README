@@ -1,0 +1,41 @@
+
+
+
+
+Mimsy - extends LXGraphModel
+
+
+  Dodeahedron
+
+  Tetrahedron - extends LXGraphModel
+    Nodes, Bars
+
+  Tetrahedra
+
+
+
+  LXGraphModel needs to be nestable
+    
+    pass existing nodes/bars to it, or a whole LXGraphModel
+   
+    need to detect shared nodes/bars, but in sub-models only traverse 
+      connections within the subgraph 
+
+    but if the larger model is composed of submodels, it will be the only one
+    that knows about all the connectinos
+
+    however, if the nodes are going to be shared, they need to be creatd first,
+    at the top level, so they can be passed to each subgraph in order to reference
+    the right node
+
+    nodes can track which subgraphs they are part of?
+
+    well right now, only solving for tetrahedral connections, so no shared
+    nodes or bars between thme.
+
+    do need to about the mapping from the dodecahedron to the tetrahedra though.
+
+    trying to manage multiple copies of each node, for face, tetra left, etc,
+    will be a wild pain in the ass. 
+
+    

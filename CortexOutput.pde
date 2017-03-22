@@ -13,29 +13,47 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import heronarts.lx.LX;
+import java.util.*;
+
+
+//private int mimsyChannelPixels = 123;
+private int mimsyChannelPixels = 123;
 
 private final String ControllerIPs[] = {
   "192.168.1.85",
-  "192.168.1.81",
-  "192.168.1.87",
+  //"192.168.1.81",
+  //"192.168.1.87",
   // "192.168.1.86",
 };
 
+public ArrayList<int[]> channelMap;
+
+
 /* ********** Physical Limits on Channels ********************************** */
 int nPixPerChannel = 256; // OPC server is set to 512 pix per channel
-int nChannelPerBoard = 48;
+int nChannelPerBoard = 5;
+//int nChannelPerBoard = 48;
 
 /* ********** Create an array for each board mapping each pixel to a channel */
 
 int[] concatenateChannels(int boardNum) {
     // expects boardNum to be indexed starting at *1*
+    System.out.format("Cortex #%d: %s", boardNum, ControllerIPs[boardNum-1]);
     //println("concatenating board " + boardNum);
     int[] pixIndex = new int[nPixPerChannel*nChannelPerBoard];
     int boardOffset = (boardNum-1) * nChannelPerBoard; 
+
+    int pixels = 0;
     for (int i=boardOffset; i<boardOffset+nChannelPerBoard; i++) {
-        int[] channelIx = model.channelMap.get(i);
-        //println("adding channel " + i + ", "+ channelIx.length + " pix");
+        int[] channelIx = new int[mimsyChannelPixels];
+        for (int p = 0; p < mimsyChannelPixels; p++) { 
+          channelIx[p] = pixels++;
+        }
+        
+        //int[] channelIx = model.channelMap.get(i);
+        System.out.format(" -- adding channel %d: %5d pixels\n", i, channelIx.length);
         for(int j=0; j<channelIx.length; j++) {
+            //System.out.format(" ---- Pixel %8d\n",  i * nPixPerChannel - boardOffset*nPixPerChannel + j);
             //println( i * nPixPerChannel - boardOffset*nPixPerChannel + j);
             pixIndex[i * nPixPerChannel - boardOffset*nPixPerChannel + j] = channelIx[j];
         }
@@ -45,10 +63,10 @@ int[] concatenateChannels(int boardNum) {
 
 /* ********** Final routine to set up the output ****************************/
 void buildOutputs() {
-    for (int i = 1; i < ControllerIPs.length; i++) {
-        lx.addOutput(new CortexOutput(lx ,ControllerIPs[i-1], i, concatenateChannels(i)));
-    }
-    //lx.addOutput(new CortexOutput(lx ,"192.168.1.85", 1, concatenateChannels(1)));
+    //for (int i = 1; i < ControllerIPs.length; i++) {
+    //    lx.addOutput(new CortexOutput(lx ,ControllerIPs[i-1], i, concatenateChannels(i)));
+    //}
+    lx.addOutput(new CortexOutput(lx ,"192.168.1.85", 1, concatenateChannels(1)));
     //lx.addOutput(new CortexOutput(lx ,"192.168.1.81", 2, concatenateChannels(2)));
     //lx.addOutput(new CortexOutput(lx, "192.168.1.87", 3, concatenateChannels(3)));
     //lx.addOutput(new CortexOutput(lx ,"192.168.1.86", 3, concatenateChannels(3)));
@@ -169,6 +187,7 @@ public class CortexOutput extends LXOutput {
   // @Override
   protected void onSend(int[] colors) {
     if (packetData == null || packetData.length == 0) return;
+    float hsb[] = new float[3];
 
     for(int i=0; i<colors.length; i++){
       // TODO MJP: this might not work as expected, if we are dimming the global color array for each datagram that is sent
@@ -193,9 +212,11 @@ public class CortexOutput extends LXOutput {
 
   // @Override
   protected byte[] getPacketData(int[] colors) {
+    //System.out.format(" ---- Packet Pixels: %8d", colors.length);
     for (int i = 0; i < this.pointIndices.length; ++i) {
       int dataOffset = INDEX_DATA + i * BYTES_PER_PIXEL;
-      int c = colors[this.pointIndices[i]];
+      int pointIndex = this.pointIndices[i]; 
+      int c = colors[pointIndex];
       this.packetData[dataOffset + OFFSET_R] = (byte) (0xFF & (c >> 16));
       this.packetData[dataOffset + OFFSET_G] = (byte) (0xFF & (c >> 8));
       this.packetData[dataOffset + OFFSET_B] = (byte) (0xFF & c);

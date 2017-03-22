@@ -167,7 +167,6 @@ void setup() {
   // Set the patterns
   lx.setPatterns(new LXPattern[] {
     new TetraBarTest(lx),
-    new TetrahedronTest(lx),
     new CircleBounce(lx),
     new Psychedelic(lx),
     new StrobePattern(lx),
@@ -176,8 +175,8 @@ void setup() {
     //new PixiePattern(lx),
     //new MoireManifoldPattern(lx),
     new RainbowBarrelRoll(lx),
-    //new GradientPattern(lx),
-    //new LayerDemoPattern(lx),
+    new GradientPattern(lx),
+    new LayerDemoPattern(lx),
     new IteratorTestPattern(lx).setTransition(new DissolveTransition(lx)),
   });
   
@@ -245,16 +244,12 @@ void draw() {
   //       add as a config
   // Gamma correction here. Apply a cubic to the brightness
   // for better representation of dynamic range
-  //
-  /*
   color[] sendColors = lx.getColors();  
-  float hsb[] = new float[3];
   for (int i = 0; i < sendColors.length; ++i) {
     LXColor.RGBtoHSB(sendColors[i], hsb);
     float b = hsb[2];
-    sendColors[i] = lx.hsb(360.*hsb[0], 100.*hsb[1], (b*b)/256.);
+    sendColors[i] = lx.hsb(360.*hsb[0], 100.*hsb[1], 100.*(b*b));
   }
-  */
 
 
 }

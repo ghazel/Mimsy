@@ -102,7 +102,7 @@ public class LXGraphModel extends LXModel {
     //public final List<Bar> adjacent_bars = new ArrayList<Bar>();
 
     /** 
-     * Constructor 
+     * Full Constructor 
      */
     public Bar(Node node1, Node node2, int channel, String[] tags,
                float density, float buffer, String layout) {
@@ -118,16 +118,19 @@ public class LXGraphModel extends LXModel {
       this.pixel_layout  = layout;
     }
     
+    /** 
+     * Full Constructor 
+     */
     public Bar(Node node1, Node node2, int channel, String tags,
                float density, float buffer, String layout) {
       //String[] tag_list = tags.trim().split("\\s+");
       //this(node1, node2, tag_list, rev, density, buffer, layout);
       this(node1, node2, channel, tags.trim().split("\\s+"), 
-           rev, density, buffer, layout);
+           density, buffer, layout);
     }
 
     public Bar(Node node1, Node node2, int channel, String tags) {
-      this(node1, node2, channel, tags, rev, none, none, none);
+      this(node1, node2, channel, tags,  none, none, none);
     }
 
     /**

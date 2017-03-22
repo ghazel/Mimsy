@@ -16,26 +16,49 @@ public static class Dodecahedron {
   float distance_euclid[][] = new float[20][20];
     
   public Net faceNet = new Net(1, 20, 3);
-  public Net tetraLNet = new Net(5, 4, 3);
-  public Net tetraRNet = new Net(5, 4, 3);
+  public Net tetraLNet = new Net(5, 4, 6);
+  public Net tetraRNet = new Net(5, 4, 6);
 
-  public static class Net {
-    static int subnets;
-    static int node_map[];
-    static int nodes[][];
-    static int edges[][];
-    //ArrayList<ArrayList<Integer>> _nodes;
-    //ArrayList<ArrayList<Integer>> _edges;
-    //static int neighbors[][];
-    static int matrix[][];
+  /*
+  Tetrahedral Edges (right)
+  Object 0 -  0 15 13  7
+  Object 1 -  1 16 14  8
+  Object 2 -  2 17 10  9
+  Object 3 -  3 18 11  5
+  Object 4 -  4 19 12  6
+
+  a-d 0-3 0-1
+  d-c 3-2 1-2
+  c-b 2-1 2-3
+  b-d 1-3 3-1
+  c-a 2-0 2-0
+  a-b 0-1 0-3
+  */
+
+
+  public class Net {
+    int subnets;
+    int node_count;
+    int edge_count;
+    int node_map[];
+    int nodes[][];
+    int edges[][];
+    int ordered[][][];
+    int ordering[][] = new int[][] 
+      {{0,1},{1,2},{2,3},{3,1},{2,0},{0,3} };
+      //{{0,1},{1,2},{2,0},{0,3},{2,3},{3,1} };
+      //{{0,1},{1,2},{2,3},{3,1},{2,0},{0,3} };
+      //{{0,1},{1,3},{3,2},{2,1},{3,0},{0,2} };
+    int matrix[][];
 
     Net(int subnets, int node_count, int edge_count) {
       this.subnets = subnets; // # of objects
+      this.node_count = node_count;
+      this.edge_count = edge_count;
       this.node_map = new int[NODES]; // map nodes to subnets
       this.nodes   = new int[subnets][node_count]; // list of nodes in each object
       this.edges   = new int[NODES][edge_count];   // neighboring edges per node
-      //this._nodes  = new ArrayList<ArrayList<Integer>>(subnets); // nodes in subnet
-      //this._edges  = new ArrayList<ArrayList<Integer>>(NODES); // node neighbors
+      this.ordered = new int[subnets][edge_count][2];   // edges in final order
       this.matrix  = new int[NODES][NODES]; // connectivity matrix
     }
 
@@ -51,27 +74,6 @@ public static class Dodecahedron {
         this.matrix[source][targets[i]] = subnet;
       }
     }
-
-    // Add an edge to an given subnet
-    /*
-    void add_edge(int subnet, int n1, int n2) {
-      ArrayList<Integer> x = _nodes.get(subnet);
-      if (!x.contains(n1)) { x.add(n1); }
-      if (!x.contains(n2)) { x.add(n2); }
-      nodes[subnet] = x.toArray(new Integer[0]); 
-
-      x = _edges.get(n1);
-      if (!x.contains(n2)) { x.add(n2); }
-      edges[n1] = x.toArray(new Integer[0]);
-      x = _edges.get(n2);
-      if (!x.contains(n1)) { x.add(n1); }
-      edges[n2] = x.toArray(new Integer[0]);
-
-      matrix[n1][n2] = subnet;
-      matrix[n2][n1] = subnet;
-    }
-    */
-
   }
 
 
@@ -103,21 +105,6 @@ public static class Dodecahedron {
   };
 
   
-  static int edges_face[][] = generate_edges_face();
-  static int edges_frabjous[][]; // = new int[20][3];
-  static int edges_tetra_left[][]; // = new int[20][3];
-  static int edges_tetra_right[][]; // = new int[20][3];
-  static int edges_cubic[][];
-
-  // ====================================================== FIXTURE ASSEMBLIES
-  static int nodes_cubic[][] = new int[5][6];
-  static int nodes_tetra_right[][] = new int[5][4];
-  static int nodes_tetra_left[][] = new int[5][4];
-  static int nodes_frabjous[][] = new int[1][20];
-  static int nodes_opposites[][] = new int[5][1];
-  */
-
-
   /* Convenient constant */
   private float the72 = PI*72.0/180;
 
@@ -128,13 +115,6 @@ public static class Dodecahedron {
     generate_edges_face();
     generate_edges_tetra(tetraLNet, "left");
     generate_edges_tetra(tetraRNet, "right");
-
-    /*
-    generate_edges_tetra("left");
-    generate_edges_tetra("right");
-    generate_edges_cubic();
-    generate_edges_frabjous();
-    */
   }
 
   /* ************************************************************* VERTICES */
@@ -178,6 +158,7 @@ public static class Dodecahedron {
   // Edges are generated in clockwise order
   void generate_edges_face() {
     System.out.format("\nDodecahedron Edges\n");
+    faceNet.set_nodes(0, new int[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,16,18,19});
     int vs, rs, cs, vt, rt, ct, rtv, rth, co1, co2, top, middle;
     for (rs = 0; rs < 4; rs++) {   // Source Rows
       for (cs = 0; cs < 5; cs++) { // Source Columns
@@ -195,7 +176,6 @@ public static class Dodecahedron {
         ct = cs;
         vt = rt*5 + ct;
         edges[vs][0] = vt;
-        //faceNet.add_edge(0, vs, vt);
         System.out.format("VEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
                           vs, rs, cs, vt, rt, ct);
 
@@ -204,16 +184,15 @@ public static class Dodecahedron {
         ct = (cs+co1)%5;
         vt = rt*5 + ct;
         edges[vs][1] = vt;
-        //faceNet.add_edge(0, vs, vt);
         System.out.format("HEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
                           vs, rs, cs, vt, rt, ct);
 
         ct = (cs+co2)%5;
         vt = rt*5 + ct;
         edges[vs][2] = vt;
-        //faceNet.add_edge(0, vs, vt);
         System.out.format("HEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
                           vs, rs, cs, vt, rt, ct);
+        faceNet.add_edges(0, vs, edges[vs]);
         System.out.format("\n");
       }
     }
@@ -254,14 +233,14 @@ public static class Dodecahedron {
     System.out.format("\nTetrahedral Edges (%s)\n", chirality);
     int v1, v2, v3, v4;
 
-    for (int i = 0; i < 5; i++) { 
+    for (int o = 0; o < net.subnets; o++) { 
       int n[] = new int[4];
-      n[0] = i;
+      n[0] = o;
 
       // Nodes, and edges from first node
       for (int j = 0; j < 3; j++) { 
         //System.out.format(" - %d %d\n", i, j);
-        v1 = i;
+        v1 = o;
         v2 = edges[v1][j];
         //v2 = faceNet.edges[v1][j];
         if (chirality == "left") { 
@@ -277,31 +256,21 @@ public static class Dodecahedron {
       }
       System.out.format("Object %d - %2d %2d %2d %2d\n", n[0], n[0], n[1], n[2], n[3]);
 
-      net.set_nodes(i, n);
-      net.add_edges(i, n[0], new int[] {n[1], n[2], n[3]});
-      net.add_edges(i, n[1], new int[] {n[0], n[3], n[2]});
-      net.add_edges(i, n[2], new int[] {n[0], n[1], n[3]});
-      net.add_edges(i, n[3], new int[] {n[0], n[2], n[1]});
-
-      // Edges between far nodes
-      for (int j = 0; j < 3; j++) { 
-        v2 = n[j+1];
-        v3 = n[((j+1)%3) + 1];
-        //net.add_edge(v1, v2, v3);
+      net.set_nodes(o, n);
+      net.add_edges(o, n[0], new int[] {n[1], n[2], n[3]});
+      net.add_edges(o, n[1], new int[] {n[0], n[3], n[2]});
+      net.add_edges(o, n[2], new int[] {n[0], n[1], n[3]});
+      net.add_edges(o, n[3], new int[] {n[0], n[2], n[1]});
+      
+      for (int e = 0; e < net.edge_count; e++) {
+        int n1 = net.nodes[o][net.ordering[e][0]];
+        int n2 = net.nodes[o][net.ordering[e][1]];
+        net.ordered[o][e][0] = n1;
+        net.ordered[o][e][1] = n2;
       }
     }
-    //System.out.format("\n");
-  }
-  
-  
-  /*
-  for (int v = 0; v < NODES; v++) { 
-    frabjous[v] = get_frabjous_connections(v);
-    tetra_left = get_tetrahedral_connections(v, "left");
-    tetra_right = get_tetrahedral_connections(v, "right");
-  }
-  */
 
+  }
 
 
   /*
@@ -327,27 +296,6 @@ public static class Dodecahedron {
       System.out.format("\n");
       return c;
     }
-  }
-
-  // ************************************************************* TETRAHEDRAL
-  // Have graph distance 3
-  int[] generate_edges_tetra(int v, String chirality) {
-    int[] c = new int[3];
-    int v1, v2, v3, v4, v5;
-    for (int i = 0; i < 3; i++) { 
-      v1 = v;
-      v2 = edges_face[v1][i];
-      if (chirality == "left") { 
-        v3 = get_left_branch(v1, v2);
-        v4 = get_right_branch(v2, v3);
-      } else {
-        v3 = get_right_branch(v1, v2);
-        v4 = get_left_branch(v2, v3);
-      }
-      c[i] = v4;
-    }
-    System.out.format("\n");
-    return c;
   }
 
   // **************************************************************** FRABJOUS
