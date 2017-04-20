@@ -190,7 +190,7 @@ class TetraBarTest extends LXPattern {
 
   private int bars = 30;
   private int pixelsPerBar = 20;
-  private int pixelsBetweenBars = 1;
+  private int pixelsBetweenBars = 0;
 
   TetraBarTest(LX lx) {
     super(lx);
@@ -203,6 +203,7 @@ class TetraBarTest extends LXPattern {
     float hue = 0.;
     baseHue += cycleSpeed.getValuef();
     baseHue %= 360.;
+    //System.out.format("Pattern over %d points\n", colors.length);
     for (int bar = 0; bar < bars; bar++) {
       hue = (float)bar * (float)colorSpread.getValuef() + baseHue;
       for (int p = 0; p < pixelsPerBar; p++) { 
@@ -214,6 +215,98 @@ class TetraBarTest extends LXPattern {
     }
   }
 }
+
+
+
+/*
+class StarBurst extends LXPattern {
+
+  // new bursts per minute
+  private final BoundedParameter burstRate =
+    new BoundedParameter("NUM", 12.0, 0.0, 180.0, QUAD_OUT);
+  // rate of travel, as fraction of bar per second
+  private final BoundedParameter burstSpeed =
+    new BoundedParameter("SPD", 10.0, 0.0, 1000.0, QUAD_OUT);
+  // fade rate in % per second
+  private final BoundedParameter burstFade =
+    new BoundedParameter("FADE", 10.0, 0.0, 1000.0, QUAD_OUT);
+
+  
+  private double lastBurst;
+
+
+  StarBurst(LX lx) { 
+    super(lx);
+  }
+
+  class Burst {
+    public Node node;
+    public Layer layer;
+    public double offset;
+    public Bar[] bars;
+
+    public Burst() {
+      this.node = model.getRandomNode();
+      this.layer = model.getRandomLayer();
+      this.bars = node.getBars(this.layer);
+      this.offset = 0.0;
+    }
+  }
+
+  private ArrayList<Burst> bursts = new ArrayList<Burst>();
+
+
+  public void paintLinear(List<LXPoint> points, 
+                          double start, double finish, int color) {
+    int _start  = int(Math.floor((double)points.size()*start));
+    int _finish = int(Math.floor((double)points.size()*finish));
+    paintLinear(points, _start, _finish, color);
+  }
+  
+  public void paintLinear(List<LXPoint> points, 
+                          int start, int finish, int color) {
+    for (int i = start; i < finish; i++) {
+      points[i] = color;
+    }
+  }
+
+
+  public void run(double deltaMs) {
+    
+    double deltaS = deltaMs / 1000.0;
+    
+    // Dim all the starbursts at Fade% / Second
+    float fadeScale = burstFade.getValuef() * deltaS;
+    for (LXPoint p : model.points) {
+     colors[p.index] =
+         LXColor.scaleBrightness(colors[p.index], fadeScale);
+    }
+
+    // Is it time for a new star burst?
+    double deltaBursts = 60.0 / burstRate;
+    if (lastBurst > deltaBursts) { 
+      bursts.add(new Burst()); 
+      lastBurst = 0.0;
+    }
+    lastBurst += deltaBursts;
+    
+    // Purge completed starburst
+    for (Burst burst : bursts) {
+      if (burst.offset > 100.0) {
+        bursts.remove(burst); } }
+    
+    // ----- Burst!
+    for (Burst burst : bursts) {
+      for (Bar bar : burst.bars) {
+        List<LXPoint> points = bar.getPoints();
+        paintLinear(points, burst.offset, burst.offset + burstSpeed*deltaS, color);
+      }
+      burst.offset += burstSpeed * deltaS;
+    }
+  }
+}
+*/
+
 
 /** *********************************************************** TETRA BAR TEST
  * Light each bar a different color, and blank the black pixel

@@ -23,13 +23,33 @@
 ** @date: 2017.01.15
 **/
 
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
 
 // **************************************************** USER FRIENDLY GLOBALS
+
+
+
+float RADIUS = 144.0;
+
+static boolean DRAW_FACES        = false;
+static boolean DRAW_FRABJOUS     = false;
+static boolean DRAW_TETRA_LEFT   = true;
+static boolean DRAW_TETRA_RIGHT  = true;
+static boolean DRAW_CUBIC        = false;
+
+double global_brightness = 1.0;
+
 
 //---------------- Output Hardware
 //String OUTPUT = "BeagleBone";
 String OUTPUT = null;
-double global_brightness = 1.0;
+
+
+
+
+
 
 //---------------- Patterns
 LXPattern[] patterns(LX lx) {
@@ -159,7 +179,8 @@ void setup() {
   size(1200, 900, P3D);
   
   //==================================================================== Model 
-  model = new Model();
+  model = buildModel();
+  //model = new Model();
   
   //===================================================================== P3LX
   lx = new P3LX(this, model);

@@ -19,22 +19,12 @@ public static class Dodecahedron {
   public Net tetraLNet = new Net(5, 4, 6);
   public Net tetraRNet = new Net(5, 4, 6);
 
-  /*
-  Tetrahedral Edges (right)
-  Object 0 -  0 15 13  7
-  Object 1 -  1 16 14  8
-  Object 2 -  2 17 10  9
-  Object 3 -  3 18 11  5
-  Object 4 -  4 19 12  6
-
-  a-d 0-3 0-1
-  d-c 3-2 1-2
-  c-b 2-1 2-3
-  b-d 1-3 3-1
-  c-a 2-0 2-0
-  a-b 0-1 0-3
-  */
-
+  String[] nodeNames = new String[] {
+    "A1","A2","A3","A4","A5",
+    "B1","B2","B3","B4","B5",
+    "C1","C2","C3","C4","C5",
+    "D1","D2","D3","D4","D5",
+  };
 
   public class Net {
     int subnets;
@@ -77,32 +67,6 @@ public static class Dodecahedron {
   }
 
 
-
-  /* There are several methods for navigating the connectiviety
-   * 1) [OBJECT][NODE] - lists of nodes
-   * 2) [OBJECT][EDGE] - lists of edges
-   * 3) [VERTICES][VERTICES] - connectivity matrix
-   * 4) [OBJECT][NODE1][NODE2] - neighbors
-   */
-
-  /*
-  static int nodes_face[][] = {
-    {0,1,2,3,4},
-  
-    {0,1,6,10,5},
-    {1,2,7,11,6},
-    {2,3,8,12,7},
-    {3,4,9,13,8},
-    {4,0,5,14,9},
-  
-    {15,16,11,6,10},
-    {16,17,12,7,11},
-    {17,18,13,8,12},
-    {18,19,14,9,13},
-    {19,15,10,5,14},
-    
-    {15,16,17,18,19},
-  };
 
   
   /* Convenient constant */
@@ -254,7 +218,7 @@ public static class Dodecahedron {
         
         //net.add_edge(v1, v1, v4);
       }
-      System.out.format("Object %d - %2d %2d %2d %2d\n", n[0], n[0], n[1], n[2], n[3]);
+      //System.out.format("Object %d - %2d %2d %2d %2d\n", n[0], n[0], n[1], n[2], n[3]);
 
       net.set_nodes(o, n);
       net.add_edges(o, n[0], new int[] {n[1], n[2], n[3]});
