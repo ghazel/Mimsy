@@ -35,8 +35,8 @@ float RADIUS = 144.0;
 
 static boolean DRAW_FACES        = true;
 static boolean DRAW_FRABJOUS     = false;
-static boolean DRAW_TETRA_LEFT   = false;
-static boolean DRAW_TETRA_RIGHT  = false;
+static boolean DRAW_TETRA_LEFT   = true;
+static boolean DRAW_TETRA_RIGHT  = true;
 static boolean DRAW_CUBIC        = false;
 
 double global_brightness = 1.0;
