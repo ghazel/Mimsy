@@ -33,10 +33,10 @@ import java.util.*;
 
 float RADIUS = 144.0;
 
-static boolean DRAW_FACES        = false;
+static boolean DRAW_FACES        = true;
 static boolean DRAW_FRABJOUS     = false;
-static boolean DRAW_TETRA_LEFT   = true;
-static boolean DRAW_TETRA_RIGHT  = true;
+static boolean DRAW_TETRA_LEFT   = false;
+static boolean DRAW_TETRA_RIGHT  = false;
 static boolean DRAW_CUBIC        = false;
 
 double global_brightness = 1.0;
@@ -102,7 +102,8 @@ final static float INCHES = 25.4;
 final static float FEET = 12.0*INCHES;
 
 
-final static int BAR_THICKNESS = 30;
+final static int BAR_THICKNESS = 10;
+//final static int BAR_THICKNESS = 30;
 
 
 // Video Mixing Channels
@@ -112,7 +113,8 @@ LXChannel L;
 LXChannel R;
 
 // Top-level, we have a model and a P3LX instance
-Model model;
+static MimsyModel model;
+static MimsyModel mimsy;
 P3LX lx;
 UI3dComponent pointCloud;
 UI3dComponent walls;
@@ -179,8 +181,10 @@ void setup() {
   size(1200, 900, P3D);
   
   //==================================================================== Model 
-  model = buildModel();
-  //model = new Model();
+  model = (MimsyModel)buildMimsyModel();
+  mimsy = model;
+  System.out.format("Build Model %s\n", model);
+  System.out.format("Build Model %s\n", model.tetraL);
   
   //===================================================================== P3LX
   lx = new P3LX(this, model);

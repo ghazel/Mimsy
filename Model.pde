@@ -1,18 +1,3 @@
-/**
- * This is a very basic model class that is a 3-D matrix
- * of points. The model contains just one fixture.
- */
-//import java.util.*;
-
-/*
-import java.io.*;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-*/
-
-
 
 
 /* Extraction of desired methods and traversals
@@ -26,20 +11,20 @@ import java.util.List;
  */
 
 
-public enum Layer { Face, Cubic, TetraL, TetraR, Frabjous }
+public enum Layer { Dodecahedron, Cubic, TetraL, TetraR, Frabjous }
 
-static class Model extends PolyGraph{
+public static class MimsyModel extends PolyGraph{
   
-  public final PolyGraph faces;
+  public final PolyGraph dodecahedron;
   public final PolyGraph tetraL;
   public final PolyGraph tetraR;
 
-  public Model(Node[] nodes, 
-               PolyGraph faces, 
+  public MimsyModel(Node[] nodes, 
+               PolyGraph dodecahedron, 
                PolyGraph tetraL, 
                PolyGraph tetraR) {
-    super(nodes, new PolyGraph[]{faces, tetraL, tetraR});
-    this.faces = faces;
+    super(nodes, new PolyGraph[]{dodecahedron, tetraL, tetraR});
+    this.dodecahedron = dodecahedron;
     this.tetraL = tetraL;
     this.tetraR = tetraR;
   }
@@ -78,6 +63,33 @@ static class Model extends PolyGraph{
     }
     return returnpoints;
   }
+
+
+
+  //********************************************************************* BARS
+
+  /*
+   * Select a Bar matching given properties
+   */
+  public Bar selectBar() {
+    Random r = new Random();
+    return bars[r.nextInt(bars.length)];
+  }
+
+
+
+
+  //******************************************************************* GRAPHS
+
+  /*
+   * Select graphs matching given properties
+   */
+  public PolyGraph selectGraph() {
+    Random r = new Random();
+    return subGraphs.get(r.nextInt(subGraphs.size()));
+  }
+
+
 
 }
 

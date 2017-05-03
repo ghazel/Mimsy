@@ -33,12 +33,6 @@ public static class Dodecahedron {
     int node_map[];
     int nodes[][];
     int edges[][];
-    int ordered[][][];
-    int ordering[][] = new int[][] 
-      {{0,1},{1,2},{2,3},{3,1},{2,0},{0,3} };
-      //{{0,1},{1,2},{2,0},{0,3},{2,3},{3,1} };
-      //{{0,1},{1,2},{2,3},{3,1},{2,0},{0,3} };
-      //{{0,1},{1,3},{3,2},{2,1},{3,0},{0,2} };
     int matrix[][];
 
     Net(int subnets, int node_count, int edge_count) {
@@ -48,7 +42,6 @@ public static class Dodecahedron {
       this.node_map = new int[NODES]; // map nodes to subnets
       this.nodes   = new int[subnets][node_count]; // list of nodes in each object
       this.edges   = new int[NODES][edge_count];   // neighboring edges per node
-      this.ordered = new int[subnets][edge_count][2];   // edges in final order
       this.matrix  = new int[NODES][NODES]; // connectivity matrix
     }
 
@@ -122,7 +115,7 @@ public static class Dodecahedron {
   // Edges are generated in clockwise order
   void generate_edges_face() {
     System.out.format("\nDodecahedron Edges\n");
-    faceNet.set_nodes(0, new int[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,16,18,19});
+    faceNet.set_nodes(0, new int[] {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19});
     int vs, rs, cs, vt, rt, ct, rtv, rth, co1, co2, top, middle;
     for (rs = 0; rs < 4; rs++) {   // Source Rows
       for (cs = 0; cs < 5; cs++) { // Source Columns
@@ -226,12 +219,14 @@ public static class Dodecahedron {
       net.add_edges(o, n[2], new int[] {n[0], n[1], n[3]});
       net.add_edges(o, n[3], new int[] {n[0], n[2], n[1]});
       
+      /*
       for (int e = 0; e < net.edge_count; e++) {
         int n1 = net.nodes[o][net.ordering[e][0]];
         int n2 = net.nodes[o][net.ordering[e][1]];
         net.ordered[o][e][0] = n1;
         net.ordered[o][e][1] = n2;
       }
+      */
     }
 
   }

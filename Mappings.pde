@@ -1,28 +1,70 @@
 
-static final int PIXELS_PER_EDGE = 20;
-static final int PIXELS_BETWEEN_EDGES = 1;
-static final int PIXELS_PER_CHANNEL = 123;
-static final int PIXEL_NODE_BUFFER = 2;
+static int PIXELS_PER_BAR = 100;
+static int PIXELS_BETWEEN_BARS = 1;
+static int PIXELS_PER_CHANNEL = 123;
+static int PIXEL_NODE_BUFFER = 2;
 
-
+static int PIXELS_TETRA_RIGHT = 54;
+static int PIXELS_TETRA_LEFT = 50;
+static int PIXELS_DODECAHEDRON = 24;
 
 int FACES_BAR_ORDER[][] =
   new int[][] {{}};
 
 int TETRAHEDRON_BAR_ORDER[][] = 
-  new int[][] {{0,1},{1,2},{2,3},{3,1},{2,0},{0,3} };
-int TETRAHEDRON_BARS_PER_CHANNEL = 6;
+  new int[][] {{0,1},{1,2},{2,3},{3,1},{2,0},{0,3}};
+//int TETRAHEDRON_BARS_PER_CHANNEL = 6;
+
+
+int DODECAHEDRON_BAR_ORDER[][] = 
+  new int[][] {
+    { 0, 1},
+    { 1, 6},
+    { 6,10},
+    {10, 5},
+    {10,15},
+    {15,16},
+    
+    { 1, 2},
+    { 2, 7},
+    { 7,11},
+    {11, 6},
+    {11,16},
+    {16,17},
+    
+    { 2, 3},
+    { 3, 8},
+    { 8,12},
+    {12, 7},
+    {12,17},
+    {17,18},
+    
+    { 3, 4},
+    { 4, 9},
+    { 9,13},
+    {13, 8},
+    {13,18},
+    {18,19},
+    
+    { 4, 0},
+    { 0, 5},
+    { 5,14},
+    {14, 9},
+    {14,19},
+    {19,15}
+  };
+
 
 public ArrayList<int[]> channelMap;
 
 
 
-public Model buildModel() {
-  
+public MimsyModel buildMimsyModel() {
+
   Dodecahedron dd = new Dodecahedron(RADIUS);
   Node[] nodes = new Node[dd.NODES];
 
-  PolyGraph faces = new PolyGraph();
+  PolyGraph dodecahedron = new PolyGraph();
   PolyGraph tetraLCompound = new PolyGraph();
   PolyGraph tetraRCompound = new PolyGraph();
 
@@ -33,58 +75,44 @@ public Model buildModel() {
       nodes[n].index, nodes[n].x, nodes[n].y, nodes[n].z);
   }
 
+
   // Build Graphs
+  if (DRAW_FACES) {
+    PIXELS_PER_BAR = PIXELS_DODECAHEDRON;
+    dodecahedron = PolyGraph.fromNodes(nodes, DODECAHEDRON_BAR_ORDER)
+                 . setLayer("Dodecahedron");
+    //faces = buildCompound(nodes, dd.faceNet, DODECAHEDRON_BAR_ORDER);
+  }
   if (DRAW_TETRA_LEFT) {
-    tetraLCompound = buildGraph(nodes, dd.tetraLNet, TETRAHEDRON_BAR_ORDER);
+    PIXELS_PER_BAR = PIXELS_TETRA_LEFT;
+    tetraLCompound = buildCompound(
+        nodes, 
+        dd.tetraLNet, 
+        TETRAHEDRON_BAR_ORDER,
+        "TetraL");
   }
   if (DRAW_TETRA_RIGHT) {
-    tetraRCompound = buildGraph(nodes, dd.tetraRNet, TETRAHEDRON_BAR_ORDER);
+    PIXELS_PER_BAR = PIXELS_TETRA_RIGHT;
+    tetraRCompound = buildCompound(
+        nodes, 
+        dd.tetraRNet, 
+        TETRAHEDRON_BAR_ORDER,
+        "TetraR");
   }
 
-
-  /*
-  // Tetra Edge Ordering
-  if (DRAW_TETRA_LEFT) {
-    Dodecahedron.Net T = dd.tetraLNet;
-    for (int t = 0; t < T.subnets; t++) { 
-      for (int e = 0; e < T.edge_count; e++) {
-        int n1 = T.ordered[t][e][0];
-        int n2 = T.ordered[t][e][1];
-        System.out.format("Tetra %d Edge %d N %2d %2d\n", t, e, n1, n2);
-        add_edge_points(n1,n2);
-        // add blank pixel for Mimsy v1
-        if ((e%2) == 0) {
-          add_edge_points(n2, n2, 1);
-        }
-      }
-    }
-  }
-
-  // Tetra Edge Ordering
-  if (DRAW_TETRA_RIGHT) {
-    Dodecahedron.Net T = dd.tetraRNet;
-    for (int t = 0; t < T.subnets; t++) { 
-      for (int e = 0; e < T.edge_count; e++) {
-        int n1 = T.ordered[t][e][0];
-        int n2 = T.ordered[t][e][1];
-        System.out.format("Tetra %d Edge %d N %2d %2d\n", t, e, n1, n2);
-        add_edge_points(n1,n2);
-        // add blank pixel for Mimsy v1
-        if ((e%2) == 0) {
-          add_edge_points(n2, n2, 1);
-        }
-      }
-    }
-  }
-  */
-
-  //return new Model(nodes, bars);
-  return new Model(nodes, faces, tetraLCompound, tetraRCompound);
+  return new MimsyModel(nodes, dodecahedron, tetraLCompound, tetraRCompound);
 }
 
 
 
-public PolyGraph buildGraph(Node[] nodes, Dodecahedron.Net net, int[][] ordering) {
+/**
+ * Build graphs based on Dodecahedral subNet geometries
+ */
+
+public PolyGraph buildCompound( Node[] nodes, 
+                                Dodecahedron.Net net, 
+                                int[][] ordering,
+                                String layer) {
   PolyGraph[] compound = new PolyGraph[net.subnets];
   for (int t = 0; t < net.subnets; t++) {
     //System.out.format(" !! Creating TetraR %d\n", t);  
@@ -92,9 +120,10 @@ public PolyGraph buildGraph(Node[] nodes, Dodecahedron.Net net, int[][] ordering
     for(int n = 0; n < net.nodes[t].length; n++) {
       pg_nodes[n] = nodes[net.nodes[t][n]];
     }
-    compound[t] = PolyGraph.fromNodes(pg_nodes, ordering);
+    compound[t] = PolyGraph.fromNodes(pg_nodes, ordering)
+                           .setLayer(layer + "_" + t);
   }
-  return PolyGraph.fromGraphs(nodes, compound);
+  return new PolyGraph(nodes, compound).setLayer(layer).markAsCompound();
 }
 
 

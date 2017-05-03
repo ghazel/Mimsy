@@ -188,14 +188,30 @@ class TetraBarTest extends LXPattern {
   private final BoundedParameter cycleSpeed = new BoundedParameter("SPD",  1., 0., 20.);
   private float baseHue = 0.0;
 
-  private int bars = 30;
-  private int pixelsPerBar = 20;
-  private int pixelsBetweenBars = 0;
+
+  List<PolyGraph> tetrahedra = new ArrayList<PolyGraph>();
+  LXPoint point;
 
   TetraBarTest(LX lx) {
     super(lx);
     addParameter(colorSpread);
     addParameter(cycleSpeed);
+
+    System.out.format("Pattern Mimsy: %s\n", mimsy);
+    System.out.format("Pattern Mimsy: %s\n", mimsy.tetraL);
+    System.out.format("Pattern Model: %s\n", model);
+    //System.out.format("Pattern Model: %s\n", (model).tetraL);
+    System.out.format("Pattern Model: %s\n", ((MimsyModel)model).tetraL);
+    /*
+    point = model.getRandomPoint();
+
+    for (PolyGraph g: model.tetraL.subGraphs) {
+      tetrahedra.add(g);
+    }
+    for (PolyGraph g: model.tetraR.subGraphs) {
+      tetrahedra.add(g);
+    }
+    */
   }
 
   public void run(double deltaMs) {
@@ -204,13 +220,18 @@ class TetraBarTest extends LXPattern {
     baseHue += cycleSpeed.getValuef();
     baseHue %= 360.;
     //System.out.format("Pattern over %d points\n", colors.length);
-    for (int bar = 0; bar < bars; bar++) {
-      hue = (float)bar * (float)colorSpread.getValuef() + baseHue;
-      for (int p = 0; p < pixelsPerBar; p++) { 
-        colors[pixel++] = lx.hsb(hue,100.,30.);
-      }
-      if ((bar % 2) == 0) {
-        colors[pixel++] = lx.hsb(0,0,0);
+    for (int t = 0; t<tetrahedra.size(); t++) {
+      PolyGraph tetra = tetrahedra.get(t);
+      for (int b = 0; b < tetra.bars.length; b++) {
+        Bar bar = tetra.bars[b];
+        
+        hue = (float)b * (float)colorSpread.getValuef() + baseHue;
+        for (int p = 0; p < bar.points.size(); p++) { 
+          colors[pixel++] = lx.hsb(hue,100.,30.);
+        }
+        if ((b % 2) == 0) {
+          colors[pixel++] = lx.hsb(0,0,0);
+        }
       }
     }
   }

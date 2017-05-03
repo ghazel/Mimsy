@@ -1,9 +1,15 @@
 public static class PolyGraph extends LXModel {
 
   //public String name;
+  public boolean isCompound = false;
   public Node[] nodes;
   public Bar[] bars;
+  public List<PolyGraph> subGraphs = new ArrayList<PolyGraph>();
+  public String layer;
+  public List<String> layers = new ArrayList<String>();
 
+  //************************************************************* CONSTRUCTORS
+  
   /*
    * Empty
    */
@@ -22,11 +28,21 @@ public static class PolyGraph extends LXModel {
     this.bars = bars;
   }
   
+  /*
+   * Compose from subgraphs
+   */
   public PolyGraph(Node[] nodes, PolyGraph[] graphs) {
    this(nodes, PolyGraph.extractBars(graphs));
+   this.addSubGraphs(graphs);
   }
+
   
   
+  //**************************************************************** FACTORIES
+  
+  /*
+   * Compose from an ordered traversal of nodes
+   */
   public static PolyGraph fromNodes(Node[] nodes, int[][] ordering) {
     Bar[] bars = new Bar[ordering.length];
     for (int b = 0; b < ordering.length; b++) { 
@@ -36,10 +52,6 @@ public static class PolyGraph extends LXModel {
       bars[b] = bar;
     } 
     return new PolyGraph(nodes, bars);
-  }
-
-  public static PolyGraph fromGraphs(Node[] nodes, PolyGraph[] graphs) {
-   return new PolyGraph(nodes, PolyGraph.extractBars(graphs));
   }
 
   public static Bar[] extractBars(PolyGraph[] graphs) {
@@ -57,6 +69,40 @@ public static class PolyGraph extends LXModel {
     return bars;
   }
    
+
+  //****************************************************************** SETTERS
+  /**
+   * Indicate that this is a compound of identical subgraphs
+   */
+  public PolyGraph markAsCompound() {
+    this.isCompound = true;
+    return this;
+  }
+
+  /**
+   * Set the name of this graph layer
+   */
+  public PolyGraph setLayer(String layer) {
+    this.layer = layer;
+    return this;
+  }
+
+  /**
+   * Add subgraphs to the model
+   */
+  public PolyGraph addSubGraph(PolyGraph graph) { 
+    this.layers.add(graph.layer);
+    this.subGraphs.add(graph);
+    return this;
+  }
+
+  public PolyGraph addSubGraphs(PolyGraph[] graphs) {
+    for (PolyGraph graph : graphs) {
+      this.addSubGraph(graph);
+    }
+    return this;
+  }
+
 
 }
 
@@ -205,7 +251,7 @@ public static class Bar extends LXModel {
       }
 
       PVector point;
-      int steps = PIXELS_PER_EDGE + 2 * PIXEL_NODE_BUFFER;
+      int steps = PIXELS_PER_BAR + 2 * PIXEL_NODE_BUFFER;
       float delta = 1.0 / (float)steps;
         
       System.out.format(" ++ Lerp nodes - %8.2f %8.2f %8.2f - %8.2f %8.2f %8.2f\n",
@@ -215,8 +261,8 @@ public static class Bar extends LXModel {
         point = PVector.lerp(node1, node2, p * delta);
         LXPoint _point = new LXPoint(point.x, point.y, point.z);
         this.points.add(_point);
-        System.out.format(" ++++ Point %5d - %8.2f %8.2f %8.2f - %8.2f %8.2f %8.2f\n",
-          _point.index, point.x, point.y, point.z, _point.x, _point.y, _point.z);
+        //System.out.format(" ++++ Point %5d - %8.2f %8.2f %8.2f - %8.2f %8.2f %8.2f\n",
+        //  _point.index, point.x, point.y, point.z, _point.x, _point.y, _point.z);
       }
     }
   }
