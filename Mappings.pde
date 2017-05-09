@@ -58,15 +58,19 @@ int DODECAHEDRON_BAR_ORDER[][] =
 public ArrayList<int[]> channelMap;
 
 
+static String DD = "Dodecahedron";
+static String TL = "TetraL";
+static String TR = "TetraR";
 
-public MimsyModel buildMimsyModel() {
+
+public PolyGraph buildMimsyModel() {
 
   Dodecahedron dd = new Dodecahedron(RADIUS);
   Node[] nodes = new Node[dd.NODES];
 
-  PolyGraph dodecahedron = new PolyGraph();
-  PolyGraph tetraLCompound = new PolyGraph();
-  PolyGraph tetraRCompound = new PolyGraph();
+  PolyGraph dodecahedron = new PolyGraph().setLayer(DD);
+  PolyGraph tetraLCompound = new PolyGraph().setLayer(TL);
+  PolyGraph tetraRCompound = new PolyGraph().setLayer(TR);
 
   // Build Nodes
   for (int n = 0; n < dd.NODES; n++) {
@@ -78,29 +82,36 @@ public MimsyModel buildMimsyModel() {
 
   // Build Graphs
   if (DRAW_FACES) {
+    System.out.format("BUILDING DODECAHEDRON\n");
     PIXELS_PER_BAR = PIXELS_DODECAHEDRON;
     dodecahedron = PolyGraph.fromNodes(nodes, DODECAHEDRON_BAR_ORDER)
                  . setLayer("Dodecahedron");
     //faces = buildCompound(nodes, dd.faceNet, DODECAHEDRON_BAR_ORDER);
   }
+
   if (DRAW_TETRA_LEFT) {
+    System.out.format("BUILDING COMPOUND TETRAHEDRA LEFT\n");
     PIXELS_PER_BAR = PIXELS_TETRA_LEFT;
     tetraLCompound = buildCompound(
         nodes, 
         dd.tetraLNet, 
         TETRAHEDRON_BAR_ORDER,
-        "TetraL");
+        TL);
   }
+
   if (DRAW_TETRA_RIGHT) {
+    System.out.format("BUILDING COMPOUND TETRAHEDRA RIGHT\n");
     PIXELS_PER_BAR = PIXELS_TETRA_RIGHT;
     tetraRCompound = buildCompound(
         nodes, 
         dd.tetraRNet, 
         TETRAHEDRON_BAR_ORDER,
-        "TetraR");
+        TR);
   }
 
-  return new MimsyModel(nodes, dodecahedron, tetraLCompound, tetraRCompound);
+  return new PolyGraph(nodes, 
+    new PolyGraph[]{dodecahedron, tetraLCompound, tetraRCompound})
+    .setLayer("Mimsy");
 }
 
 

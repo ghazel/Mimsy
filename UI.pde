@@ -3,6 +3,75 @@
  * rendered inside the camera view context. We just override the
  * onDraw method and invoke Processing drawing methods directly.
  */
+
+
+
+
+class UIVertices extends UI3dComponent {
+
+  private final float NODE_RADIUS = 10.0;
+  private String COLOR_SCHEME = "LEVEL_COLOR";
+
+  protected void onDraw(UI ui, PGraphics pg) {
+    float hue =   0.0;
+    float sat = 100.0;
+    float brt = 100.0;
+    float alp = 100.0;
+
+    float dHue =  60;
+    float dSat =  20;
+    float dBrt =  20;
+    noStroke();
+    for (Node node : model.nodes) {
+      int level = (int)Math.floor(node.index / 5.0);
+      int spin = node.index % 5;
+
+      if (COLOR_SCHEME == "SPIN_COLOR") {
+        hue = level * dHue;
+        sat = 100.0 - (spin * dSat);
+        brt = 100.0 - (spin * dBrt);
+      } else if (COLOR_SCHEME == "LEVEL_COLOR") {
+        hue = spin * dHue;
+        sat = 100.0 - (level * dSat);
+        brt = 100.0 - (level * dBrt);
+      }
+
+      fill(hue,sat,brt,alp);
+      pushMatrix();
+      translate(node.x, node.y, node.z);
+      sphere(NODE_RADIUS);
+      popMatrix();
+    }
+
+    // NOTE: This renders the labels oriented in 3D, which makes them useless.
+    if (false) {
+      //noLights();
+      hint(DISABLE_DEPTH_TEST);
+      textAlign(CENTER, CENTER);
+      textSize(24);
+      fill(0,0,255);
+      //fill(0, 102, 153, 51);
+      for (Node node : model.nodes) {
+        pushMatrix();
+        translate(node.x, node.y, node.z);
+        text(node.index, 0, 0, 0);
+        //text(node.index, node.x, node.y, node.z);
+        popMatrix();
+      }
+      hint(ENABLE_DEPTH_TEST);
+    }
+  }
+
+  protected void swapColorScheme() {
+    if (COLOR_SCHEME == "LEVEL_COLOR") {
+      COLOR_SCHEME = "ROW_COLOR";
+    } else {
+      COLOR_SCHEME = "LEVEL_COLOR";
+    }
+  }
+}
+
+
 class UIWalls extends UI3dComponent {
   
   private final float WALL_MARGIN = 2*FEET;
@@ -34,11 +103,22 @@ class UIWalls extends UI3dComponent {
 
 class UISimulationControl extends UIWindow {
   UISimulationControl(UI ui, float x, float y) {
-    super(ui, "SIMULATION", x, y, UIChannelControl.WIDTH, 76);
+    super(ui, "SIMULATION", x, y, UIChannelControl.WIDTH, 100);
     y = UIWindow.TITLE_LABEL_HEIGHT;
-    new UIButton(4, y, width-8, 20).setLabel("Show Walls").setParameter(walls.visible).addToContainer(this);
+    new UIButton(4, y, width-8, 20)
+      .setLabel("Show Walls")
+      .setParameter(walls.visible)
+      .addToContainer(this);
     y += 24;
-    new UIButton(4, y, width-8, 20).setLabel("Show Nodes").setParameter(pointCloud.visible).addToContainer(this);
+    new UIButton(4, y, width-8, 20)
+      .setLabel("Show Vertices")
+      .setParameter(vertices.visible)
+      .addToContainer(this);
+    y += 24;
+    new UIButton(4, y, width-8, 20)
+      .setLabel("Show LEDs")
+      .setParameter(pointCloud.visible)
+      .addToContainer(this);
   }
 }
 
@@ -47,7 +127,7 @@ class UIEngineControl extends UIWindow {
   final UIKnob fpsKnob;
   
   UIEngineControl(UI ui, float x, float y) {
-    super(ui, "ENGINE", x, y, UIChannelControl.WIDTH, 96);
+    super(ui, "ENGINE", x, y, UIChannelControl.WIDTH, 124);
         
     y = UIWindow.TITLE_LABEL_HEIGHT;
     new UIButton(4, y, width-8, 20) {
@@ -59,6 +139,19 @@ class UIEngineControl extends UIWindow {
     .setActiveLabel("Multi-Threaded")
     .setInactiveLabel("Single-Threaded")
     .addToContainer(this);
+   
+    /* 
+    y += 24;
+    new UIButton(4, y, width-8, 20) {
+      protected void onToggle(boolean enabled) {
+        if (enabled) { ortho(); }
+        else { perspective(); }
+      }
+    }
+    .setActiveLabel("Orthoscopic")
+    .setInactiveLabel("Perspective")
+    .addToContainer(this);
+    */
     
     y += 24;
     fpsKnob = new UIKnob(4, y);    
@@ -66,6 +159,7 @@ class UIEngineControl extends UIWindow {
     .setParameter(lx.engine.framesPerSecond)
     .setEnabled(lx.engine.isThreaded())
     .addToContainer(this);
+    
   }
 }
 

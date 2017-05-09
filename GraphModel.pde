@@ -34,6 +34,7 @@ public static class PolyGraph extends LXModel {
   public PolyGraph(Node[] nodes, PolyGraph[] graphs) {
    this(nodes, PolyGraph.extractBars(graphs));
    this.addSubGraphs(graphs);
+   // TODO: Copy bars into main graph
   }
 
   
@@ -45,9 +46,10 @@ public static class PolyGraph extends LXModel {
    */
   public static PolyGraph fromNodes(Node[] nodes, int[][] ordering) {
     Bar[] bars = new Bar[ordering.length];
-    for (int b = 0; b < ordering.length; b++) { 
+    for (int b = 0; b < ordering.length; b++) {
       Node n1 = nodes[ordering[b][0]];
       Node n2 = nodes[ordering[b][1]];
+      System.out.format("Bar [%d]: %2d %2d\n", b, n1.index, n2.index);
       Bar bar = new Bar(n1, n2);
       bars[b] = bar;
     } 
@@ -104,13 +106,71 @@ public static class PolyGraph extends LXModel {
   }
 
 
-}
+  //******************************************************************* LAYERS
+  /**
+   * Get Layer
+   */
+  public PolyGraph getLayer(String layer) {
+    int index = layers.indexOf(layer);
+    if (index < 0) {
+      System.out.format("!! Could not find layer named '%s'.\n", layer);
+    }
+    return subGraphs.get(index);
+  }
+
+  public PolyGraph getLayer(int index) {
+    return subGraphs.get(index);
+  }
+
+  public PolyGraph getLayer() {
+    Random randomized = new Random();
+    return subGraphs.get(randomized.nextInt(subGraphs.size()));
+  }
+
+  public List<PolyGraph> getLayers() {
+    return subGraphs;
+  }
+
+
+  //******************************************************************* POINTS
+  /**
+   * Gets a random point from the model.
+   */
+  public LXPoint getRandomPoint() {
+    Random randomized = new Random();
+    return this.points.get(randomized.nextInt(points.size()));
+  }
+
+  /**
+   * Gets random points from the model.
+   */
+  public ArrayList<LXPoint> getRandomPoints(int num_requested) {
+    Random randomized = new Random();
+    ArrayList<LXPoint> returnpoints = new ArrayList<LXPoint>();
+    
+    while (returnpoints.size () < num_requested) {
+      returnpoints.add(this.getRandomPoint());
+    }
+    return returnpoints;
+  }
 
 
 
-public static class Symmetry {
+  //********************************************************************* BARS
 
-  Symmetry(){}
+  /*
+   * Select a Bar matching given properties
+   */
+  public Bar getBar() {
+    Random r = new Random();
+    return bars[r.nextInt(bars.length)];
+  }
+
+
+
+
+
+
 
 }
 
@@ -254,8 +314,8 @@ public static class Bar extends LXModel {
       int steps = PIXELS_PER_BAR + 2 * PIXEL_NODE_BUFFER;
       float delta = 1.0 / (float)steps;
         
-      System.out.format(" ++ Lerp nodes - %8.2f %8.2f %8.2f - %8.2f %8.2f %8.2f\n",
-        node1.x, node1.y, node1.z, node2.x, node2.y, node2.z);
+      //System.out.format(" ++ Lerp nodes - %8.2f %8.2f %8.2f - %8.2f %8.2f %8.2f\n",
+      //  node1.x, node1.y, node1.z, node2.x, node2.y, node2.z);
 
       for (float p = PIXEL_NODE_BUFFER; p < steps; p++) {
         point = PVector.lerp(node1, node2, p * delta);
@@ -271,7 +331,7 @@ public static class Bar extends LXModel {
 
 
 public static LXFixture[] extractFixtures(Bar[] bars) {
-  System.out.format(" <--- extractFixtures %d\n", bars.length);
+  //System.out.format(" <--- extractFixtures %d\n", bars.length);
   LXFixture[] fixtures = (LXFixture[]) bars;
   return fixtures;
 }

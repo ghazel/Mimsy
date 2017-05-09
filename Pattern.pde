@@ -182,7 +182,9 @@ class Psychedelic extends LXPattern {
  * Light each bar a different color, and blank the black pixel
  ****************************************************************************/
 
-class TetraBarTest extends LXPattern {
+
+/*
+class TetraBarTest2 extends LXPattern {
   private final BoundedParameter colorSpread
       = new BoundedParameter("CLR", 30.0, 0.0, 360.0);
   private final BoundedParameter cycleSpeed = new BoundedParameter("SPD",  1., 0., 20.);
@@ -202,16 +204,16 @@ class TetraBarTest extends LXPattern {
     System.out.format("Pattern Model: %s\n", model);
     //System.out.format("Pattern Model: %s\n", (model).tetraL);
     System.out.format("Pattern Model: %s\n", ((MimsyModel)model).tetraL);
-    /*
-    point = model.getRandomPoint();
-
-    for (PolyGraph g: model.tetraL.subGraphs) {
-      tetrahedra.add(g);
-    }
-    for (PolyGraph g: model.tetraR.subGraphs) {
-      tetrahedra.add(g);
-    }
-    */
+    
+    //point = model.getRandomPoint();
+    //
+    //for (PolyGraph g: model.tetraL.subGraphs) {
+    //  tetrahedra.add(g);
+    //}
+    //for (PolyGraph g: model.tetraR.subGraphs) {
+    //  tetrahedra.add(g);
+    //}
+    //
   }
 
   public void run(double deltaMs) {
@@ -236,7 +238,7 @@ class TetraBarTest extends LXPattern {
     }
   }
 }
-
+*/
 
 
 /*
