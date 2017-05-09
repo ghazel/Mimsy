@@ -32,13 +32,14 @@ import java.util.*;
 
 
 static float RADIUS = 144.0;
-static int BAR_THICKNESS = 5;
+static int DD_THICKNESS = 10;
+static int TT_THICKNESS =  5;
 
 
 static boolean DRAW_FACES        = true;
 static boolean DRAW_FRABJOUS     = false;
 static boolean DRAW_TETRA_LEFT   = true;
-static boolean DRAW_TETRA_RIGHT  = false;
+static boolean DRAW_TETRA_RIGHT  = true;
 static boolean DRAW_CUBIC        = false;
 
 double global_brightness = 1.0;
@@ -117,9 +118,12 @@ LXChannel L;
 LXChannel R;
 
 // Top-level, we have a model and a P3LX instance
-static PolyGraph model;
+static GraphModel model;
 P3LX lx;
-UI3dComponent pointCloud;
+UI3dComponent pointCloudDodecahedron;
+UI3dComponent pointCloudTetraLeft;
+UI3dComponent pointCloudTetraRight;
+
 UI3dComponent walls;
 UI3dComponent vertices;
 
@@ -184,7 +188,8 @@ LXEffect getSelectedEffect() {
  * Connect to output hardware
 ************************************************************************** **/
 void setup() {
-  size(1200, 900, P3D);
+  size(1920, 1100, P3D);
+  //size(1200, 900, P3D);
   smooth(4);
   
   //==================================================================== Model 
@@ -221,7 +226,15 @@ void setup() {
   //******************************************************************** 3D Model
 
   walls = new UIWalls();
+  walls.setVisible(false);
   vertices = new UIVertices();
+  pointCloudDodecahedron = new UIPointCloud(lx, model.getLayer(DD))
+                               .setPointSize(DD_THICKNESS);
+  pointCloudTetraLeft    = new UIPointCloud(lx, model.getLayer(TL))
+                               .setPointSize(TT_THICKNESS);
+  pointCloudTetraRight   = new UIPointCloud(lx, model.getLayer(TR))
+                               .setPointSize(TT_THICKNESS);
+
 
   lx.ui.addLayer(
     // A camera layer makes an OpenGL layer that we can easily 
@@ -235,15 +248,6 @@ void setup() {
         //pointLight(H,S,B, model.cx, model.cy,             -20*FEET);
         //pointLight(H,S,B, model.cx, model.yMax + 10*FEET, model.cz);
         //pointLight(H,S,B, model.cx, model.yMin - 10*FEET, model.cz);
-
-        /*
-        pointLight(H,S,B, model.xMin*5, model.cy, model.cz);
-        pointLight(H,S,B, model.xMax*5, model.cy, model.cz);
-        pointLight(H,S,B, model.cx, model.yMin*5, model.cz);
-        pointLight(H,S,B, model.cx, model.yMax*5, model.cz);
-        pointLight(H,S,B, model.cx, model.cy, model.zMin*5);
-        pointLight(H,S,B, model.cx, model.cy, model.zMax*5);
-        */
 
         for (float mx : new float[]{model.xMin, model.xMax}) {
           for (float my : new float[]{model.yMin, model.yMax}) {
@@ -271,7 +275,7 @@ void setup() {
     }
   
     .setRadius(1000)
-    //.setPerspective(0)
+    .setPerspective(0)
     .setCenter(model.cx, model.cy, model.cz)
 
     .setPhi(-PI/2) // Rotate around X
@@ -282,7 +286,10 @@ void setup() {
     //.setRotationAcceleration(3*PI)
     
     // Let's add a point cloud of our animation points
-    .addComponent(pointCloud = new UIPointCloud(lx, model).setPointSize(BAR_THICKNESS))
+    //.addComponent(pointCloud = new UIPointCloud(lx, model).setPointSize(BAR_THICKNESS))
+    .addComponent(pointCloudDodecahedron)
+    .addComponent(pointCloudTetraLeft)
+    .addComponent(pointCloudTetraRight)
     // And a custom UI object of our own
     .addComponent(walls)
     .addComponent(vertices)
@@ -305,7 +312,7 @@ void setup() {
     logTime("Built output clients");
   }
 
-  ortho();
+  //ortho();
 
 }
 

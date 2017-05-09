@@ -115,9 +115,20 @@ class UISimulationControl extends UIWindow {
       .setParameter(vertices.visible)
       .addToContainer(this);
     y += 24;
-    new UIButton(4, y, width-8, 20)
-      .setLabel("Show LEDs")
-      .setParameter(pointCloud.visible)
+
+    int w = 20;
+    int b = 4;
+    new UIButton(4, y, 30, 20)
+      .setLabel("DD")
+      .setParameter(pointCloudDodecahedron.visible)
+      .addToContainer(this);
+    new UIButton(38, y, 30, 20)
+      .setLabel("TL")
+      .setParameter(pointCloudTetraLeft.visible)
+      .addToContainer(this);
+    new UIButton(72, y, 30, 20)
+      .setLabel("TR")
+      .setParameter(pointCloudTetraRight.visible)
       .addToContainer(this);
   }
 }

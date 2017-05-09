@@ -63,14 +63,14 @@ static String TL = "TetraL";
 static String TR = "TetraR";
 
 
-public PolyGraph buildMimsyModel() {
+public GraphModel buildMimsyModel() {
 
   Dodecahedron dd = new Dodecahedron(RADIUS);
   Node[] nodes = new Node[dd.NODES];
 
-  PolyGraph dodecahedron = new PolyGraph().setLayer(DD);
-  PolyGraph tetraLCompound = new PolyGraph().setLayer(TL);
-  PolyGraph tetraRCompound = new PolyGraph().setLayer(TR);
+  GraphModel dodecahedron = new GraphModel().setLayer(DD);
+  GraphModel tetraLCompound = new GraphModel().setLayer(TL);
+  GraphModel tetraRCompound = new GraphModel().setLayer(TR);
 
   // Build Nodes
   for (int n = 0; n < dd.NODES; n++) {
@@ -84,7 +84,7 @@ public PolyGraph buildMimsyModel() {
   if (DRAW_FACES) {
     System.out.format("BUILDING DODECAHEDRON\n");
     PIXELS_PER_BAR = PIXELS_DODECAHEDRON;
-    dodecahedron = PolyGraph.fromNodes(nodes, DODECAHEDRON_BAR_ORDER)
+    dodecahedron = GraphModel.fromNodes(nodes, DODECAHEDRON_BAR_ORDER)
                  . setLayer("Dodecahedron");
     //faces = buildCompound(nodes, dd.faceNet, DODECAHEDRON_BAR_ORDER);
   }
@@ -109,8 +109,8 @@ public PolyGraph buildMimsyModel() {
         TR);
   }
 
-  return new PolyGraph(nodes, 
-    new PolyGraph[]{dodecahedron, tetraLCompound, tetraRCompound})
+  return new GraphModel(nodes, 
+    new GraphModel[]{dodecahedron, tetraLCompound, tetraRCompound})
     .setLayer("Mimsy");
 }
 
@@ -120,21 +120,21 @@ public PolyGraph buildMimsyModel() {
  * Build graphs based on Dodecahedral subNet geometries
  */
 
-public PolyGraph buildCompound( Node[] nodes, 
+public GraphModel buildCompound( Node[] nodes, 
                                 Dodecahedron.Net net, 
                                 int[][] ordering,
                                 String layer) {
-  PolyGraph[] compound = new PolyGraph[net.subnets];
+  GraphModel[] compound = new GraphModel[net.subnets];
   for (int t = 0; t < net.subnets; t++) {
     //System.out.format(" !! Creating TetraR %d\n", t);  
     Node[] pg_nodes = new Node[net.nodes[t].length];
     for(int n = 0; n < net.nodes[t].length; n++) {
       pg_nodes[n] = nodes[net.nodes[t][n]];
     }
-    compound[t] = PolyGraph.fromNodes(pg_nodes, ordering)
+    compound[t] = GraphModel.fromNodes(pg_nodes, ordering)
                            .setLayer(layer + "_" + t);
   }
-  return new PolyGraph(nodes, compound).setLayer(layer).markAsCompound();
+  return new GraphModel(nodes, compound).setLayer(layer).markAsCompound();
 }
 
 

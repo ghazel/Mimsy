@@ -1,10 +1,10 @@
-public abstract class PolyGraphPattern extends LXPattern {
+public abstract class GraphPattern extends LXPattern {
 
-  PolyGraph model;
+  GraphModel model;
 
-  protected PolyGraphPattern(LX lx) {
+  protected GraphPattern(LX lx) {
     super(lx);
-    this.model = (PolyGraph) lx.model;    
+    this.model = (GraphModel) lx.model;    
   }
 }
 
@@ -17,7 +17,7 @@ public abstract class PolyGraphPattern extends LXPattern {
  * Light each bar a different color, and blank the black pixel
  ****************************************************************************/
 
-class TetraBarTest extends PolyGraphPattern {
+class TetraBarTest extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -33,7 +33,7 @@ class TetraBarTest extends PolyGraphPattern {
   private float baseHue = 0.0;
 
 
-  List<PolyGraph> tetrahedra = new ArrayList<PolyGraph>();
+  List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
 
   TetraBarTest(LX lx) {
@@ -45,8 +45,8 @@ class TetraBarTest extends PolyGraphPattern {
     addParameter(colorBrightness);
     addParameter(colorBrightnessRange);
 
-    for (PolyGraph g: model.getLayer(TR).subGraphs) { tetrahedra.add(g); }
-    for (PolyGraph g: model.getLayer(TL).subGraphs) { tetrahedra.add(g); }
+    for (GraphModel g: model.getLayer(TR).subGraphs) { tetrahedra.add(g); }
+    for (GraphModel g: model.getLayer(TL).subGraphs) { tetrahedra.add(g); }
   }
 
   public void run(double deltaMs) {
@@ -64,7 +64,7 @@ class TetraBarTest extends PolyGraphPattern {
     baseHue %= 360.;
     
     for (int t = 0; t<tetrahedra.size(); t++) {
-      PolyGraph tetra = tetrahedra.get(t);
+      GraphModel tetra = tetrahedra.get(t);
       float db = dBrt / (float)tetra.bars.length ;
       float ds = dSat / (float)tetra.bars.length ;
       hue = (float)t * dHue + baseHue;
@@ -82,11 +82,46 @@ class TetraBarTest extends PolyGraphPattern {
 
 
 
+/** *********************************************************** TETRA BAR TEST
+ * Light each bar a different color, and blank the black pixel
+ ****************************************************************************/
+
+
+class TetrahedronTest extends LXPattern {
+  private final BoundedParameter colorSpread
+      = new BoundedParameter("CLR", 60.0, 0.0, 360.0);
+  private final BoundedParameter cycleSpeed = new BoundedParameter("SPD",  1., 0., 20.);
+  private float baseHue = 0.0;
+
+  private int pixelsPerChannel = 123;
+  private int channelCount = 5;
+
+  TetrahedronTest(LX lx) {
+    super(lx);
+    addParameter(colorSpread);
+    addParameter(cycleSpeed);
+  }
+
+  public void run(double deltaMs) {
+    int pixel = 0;
+    float hue = 0.0;
+    baseHue += cycleSpeed.getValuef();
+    baseHue %= 360.;    
+    for (int channel = 0; channel < channelCount; channel++) {
+      hue = (float)channel * (float)colorSpread.getValue() + baseHue;
+      for (int p = 0; p < pixelsPerChannel; p++) { 
+        colors[pixel++] = lx.hsb(hue,100.,30.);
+      }
+    }
+  }
+}
+
+
 /** ****************************************************** TETRAHEDRON MAPPING
  * Show the mapping for a single channel of a tetrahedron.
  ****************************************************************************/
 
-class MappingTetrahedron extends PolyGraphPattern {
+class MappingTetrahedron extends GraphPattern {
 
   float hueRange = 270.f;
   //float dHue     =  30.f;
@@ -98,8 +133,8 @@ class MappingTetrahedron extends PolyGraphPattern {
 
   MappingTetrahedron(LX lx) {
     super(lx);
-    //for (PolyGraph g: model.tetraL.subGraphs) { tetrahedra.add(g); }
-    //for (PolyGraph g: model.tetraR.subGraphs) { tetrahedra.add(g); }
+    //for (GraphModel g: model.tetraL.subGraphs) { tetrahedra.add(g); }
+    //for (GraphModel g: model.tetraR.subGraphs) { tetrahedra.add(g); }
   }
 
   public void run(double deltaMs) {
@@ -111,34 +146,30 @@ class MappingTetrahedron extends PolyGraphPattern {
       colors[p.index] = lx.hsb(0.0,0.0,20.0);
     }
     for (LXPoint p: model.getLayer(TR).points) {
-      colors[p.index] = lx.hsb(225.0,20.0,40.0);
+      colors[p.index] = lx.hsb(0.0,0.0,20.0);
     }
 
-    PolyGraph tetraL = model.getLayer(TL).getLayer(0);
-    //PolyGraph tetraR = model.tetraR.subGraphs.get(0);
+    GraphModel tetraL = model.getLayer(TL).getLayer(0);
+    GraphModel tetraR = model.getLayer(TR).getLayer(0);
     Bar bar0 = tetraL.bars[0];
     float dHue = hueRange / ((float)tetraL.bars.length) / ((float)bar0.points.size());
     float hue = 0.0;
-
     for (int b = 0; b < tetraL.bars.length; b++) {
       Bar bar = tetraL.bars[b];
-      //hue = dHue * (float) b;
       for (LXPoint p: bar.points) {
         colors[p.index] = lx.hsb(hue,baseSat,baseBrt);
         hue += dHue;
       }
     }
-    /*
-    hue = 180.0;
+
+    hue = 0.0;
     for (int b = 0; b < tetraR.bars.length; b++) {
       Bar bar = tetraR.bars[b];
-      //hue = dHue * (float) b;
       for (LXPoint p: bar.points) {
         colors[p.index] = lx.hsb(hue,baseSat,baseBrt);
         hue += dHue;
       }
-    }
-    */
+    }    
   }
 }
 

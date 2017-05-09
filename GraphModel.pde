@@ -1,10 +1,10 @@
-public static class PolyGraph extends LXModel {
+public static class GraphModel extends LXModel {
 
   //public String name;
   public boolean isCompound = false;
   public Node[] nodes;
   public Bar[] bars;
-  public List<PolyGraph> subGraphs = new ArrayList<PolyGraph>();
+  public List<GraphModel> subGraphs = new ArrayList<GraphModel>();
   public String layer;
   public List<String> layers = new ArrayList<String>();
 
@@ -13,7 +13,7 @@ public static class PolyGraph extends LXModel {
   /*
    * Empty
    */
-  public PolyGraph() {
+  public GraphModel() {
     super();
     nodes = new Node[0];
     bars = new Bar[0];
@@ -22,7 +22,7 @@ public static class PolyGraph extends LXModel {
   /*
    * Known Nodes and Bars
    */
-  public PolyGraph(Node[] nodes, Bar[] bars) {
+  public GraphModel(Node[] nodes, Bar[] bars) {
     super(extractFixtures(bars));
     this.nodes = nodes;
     this.bars = bars;
@@ -31,8 +31,8 @@ public static class PolyGraph extends LXModel {
   /*
    * Compose from subgraphs
    */
-  public PolyGraph(Node[] nodes, PolyGraph[] graphs) {
-   this(nodes, PolyGraph.extractBars(graphs));
+  public GraphModel(Node[] nodes, GraphModel[] graphs) {
+   this(nodes, GraphModel.extractBars(graphs));
    this.addSubGraphs(graphs);
    // TODO: Copy bars into main graph
   }
@@ -44,7 +44,7 @@ public static class PolyGraph extends LXModel {
   /*
    * Compose from an ordered traversal of nodes
    */
-  public static PolyGraph fromNodes(Node[] nodes, int[][] ordering) {
+  public static GraphModel fromNodes(Node[] nodes, int[][] ordering) {
     Bar[] bars = new Bar[ordering.length];
     for (int b = 0; b < ordering.length; b++) {
       Node n1 = nodes[ordering[b][0]];
@@ -53,17 +53,17 @@ public static class PolyGraph extends LXModel {
       Bar bar = new Bar(n1, n2);
       bars[b] = bar;
     } 
-    return new PolyGraph(nodes, bars);
+    return new GraphModel(nodes, bars);
   }
 
-  public static Bar[] extractBars(PolyGraph[] graphs) {
+  public static Bar[] extractBars(GraphModel[] graphs) {
     int bar_count = 0;
-    for(PolyGraph graph : graphs) {
+    for(GraphModel graph : graphs) {
       bar_count += graph.bars.length;
     }
     Bar[] bars = new Bar[bar_count];
     int b = 0;
-    for(PolyGraph graph : graphs) { 
+    for(GraphModel graph : graphs) { 
       for(Bar bar : graph.bars) {
         bars[b++] = bar;
       }
@@ -76,7 +76,7 @@ public static class PolyGraph extends LXModel {
   /**
    * Indicate that this is a compound of identical subgraphs
    */
-  public PolyGraph markAsCompound() {
+  public GraphModel markAsCompound() {
     this.isCompound = true;
     return this;
   }
@@ -84,7 +84,7 @@ public static class PolyGraph extends LXModel {
   /**
    * Set the name of this graph layer
    */
-  public PolyGraph setLayer(String layer) {
+  public GraphModel setLayer(String layer) {
     this.layer = layer;
     return this;
   }
@@ -92,14 +92,14 @@ public static class PolyGraph extends LXModel {
   /**
    * Add subgraphs to the model
    */
-  public PolyGraph addSubGraph(PolyGraph graph) { 
+  public GraphModel addSubGraph(GraphModel graph) { 
     this.layers.add(graph.layer);
     this.subGraphs.add(graph);
     return this;
   }
 
-  public PolyGraph addSubGraphs(PolyGraph[] graphs) {
-    for (PolyGraph graph : graphs) {
+  public GraphModel addSubGraphs(GraphModel[] graphs) {
+    for (GraphModel graph : graphs) {
       this.addSubGraph(graph);
     }
     return this;
@@ -110,7 +110,7 @@ public static class PolyGraph extends LXModel {
   /**
    * Get Layer
    */
-  public PolyGraph getLayer(String layer) {
+  public GraphModel getLayer(String layer) {
     int index = layers.indexOf(layer);
     if (index < 0) {
       System.out.format("!! Could not find layer named '%s'.\n", layer);
@@ -118,16 +118,16 @@ public static class PolyGraph extends LXModel {
     return subGraphs.get(index);
   }
 
-  public PolyGraph getLayer(int index) {
+  public GraphModel getLayer(int index) {
     return subGraphs.get(index);
   }
 
-  public PolyGraph getLayer() {
+  public GraphModel getLayer() {
     Random randomized = new Random();
     return subGraphs.get(randomized.nextInt(subGraphs.size()));
   }
 
-  public List<PolyGraph> getLayers() {
+  public List<GraphModel> getLayers() {
     return subGraphs;
   }
 
