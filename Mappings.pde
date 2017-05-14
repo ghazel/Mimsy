@@ -4,9 +4,9 @@ static int PIXELS_BETWEEN_BARS = 1;
 static int PIXELS_PER_CHANNEL = 123;
 static int PIXEL_NODE_BUFFER = 2;
 
-static int PIXELS_TETRA_RIGHT = 54;
-static int PIXELS_TETRA_LEFT = 50;
 static int PIXELS_DODECAHEDRON = 24;
+static int PIXELS_TETRA_LEFT = 50;
+static int PIXELS_TETRA_RIGHT = 54;
 
 int FACES_BAR_ORDER[][] =
   new int[][] {{}};
@@ -62,10 +62,11 @@ static String DD = "Dodecahedron";
 static String TL = "TetraL";
 static String TR = "TetraR";
 
+public static final Dodecahedron dd = new Dodecahedron(RADIUS);
+
 
 public GraphModel buildMimsyModel() {
 
-  Dodecahedron dd = new Dodecahedron(RADIUS);
   Node[] nodes = new Node[dd.NODES];
 
   GraphModel dodecahedron = new GraphModel().setLayer(DD);
@@ -75,14 +76,14 @@ public GraphModel buildMimsyModel() {
   // Build Nodes
   for (int n = 0; n < dd.NODES; n++) {
     nodes[n] = new Node(dd.xyz[n]).setName(dd.nodeNames[n]);
-    System.out.format("+ Node %2d - %8.2f %8.2f %8.2f\n",
-      nodes[n].index, nodes[n].x, nodes[n].y, nodes[n].z);
+    //System.out.format("+ Node %2d - %8.2f %8.2f %8.2f\n",
+    //  nodes[n].index, nodes[n].x, nodes[n].y, nodes[n].z);
   }
 
 
   // Build Graphs
-  if (DRAW_FACES) {
-    System.out.format("BUILDING DODECAHEDRON\n");
+  if (DRAW_DODECAHEDRON) {
+    out("BUILDING DODECAHEDRON\n");
     PIXELS_PER_BAR = PIXELS_DODECAHEDRON;
     dodecahedron = GraphModel.fromNodes(nodes, DODECAHEDRON_BAR_ORDER)
                  . setLayer("Dodecahedron");
@@ -90,7 +91,7 @@ public GraphModel buildMimsyModel() {
   }
 
   if (DRAW_TETRA_LEFT) {
-    System.out.format("BUILDING COMPOUND TETRAHEDRA LEFT\n");
+    out("BUILDING COMPOUND TETRAHEDRA LEFT (INNER 50 LEDs/Bar)\n");
     PIXELS_PER_BAR = PIXELS_TETRA_LEFT;
     tetraLCompound = buildCompound(
         nodes, 
@@ -100,7 +101,7 @@ public GraphModel buildMimsyModel() {
   }
 
   if (DRAW_TETRA_RIGHT) {
-    System.out.format("BUILDING COMPOUND TETRAHEDRA RIGHT\n");
+    out("BUILDING COMPOUND TETRAHEDRA RIGHT (OUTER 54 LEDs/Bar)\n");
     PIXELS_PER_BAR = PIXELS_TETRA_RIGHT;
     tetraRCompound = buildCompound(
         nodes, 
@@ -113,6 +114,85 @@ public GraphModel buildMimsyModel() {
     new GraphModel[]{dodecahedron, tetraLCompound, tetraRCompound})
     .setLayer("Mimsy");
 }
+
+
+
+
+public void buildChannelMap(GraphModel model) {
+
+  GraphModel dodeca = model.getLayer(DD);
+  GraphModel tetraL = model.getLayer(TL);
+  GraphModel tetraR = model.getLayer(TR);
+
+
+  // Initialize Channel Map
+  channelMap = new ArrayList<int[]>();
+
+  // Channel order is based on starting at a given node, 0-4, so that 
+  // they can share a power supply at that node, and thus a receiver.
+
+  // Repeat 5 times:
+  //  - 6 bars of dodecahedron
+  //  - 1 tetrahedron left
+  //  - 1 tetrahedron right
+
+  int channel = 0;
+  Bar[] bars = new Bar[6];
+  for (int i = 0; i < 5; i++) {
+
+    // DD bars
+    for (int b = 0; b < 6; b++) {
+      bars[b] = dodeca.bars[i*6+b];
+    }
+    addBarsToChannel(bars, channel++);
+
+    // Tetrahedra Bars
+    addBarsToChannel(tetraL.subGraphs.get(i).bars, channel++);
+    addBarsToChannel(tetraR.subGraphs.get(i).bars, channel++);
+  }
+}
+
+public void addBarsToChannel(Bar[] bars, int channel) {
+  int total = 0;
+  for (Bar bar : bars) { total += bar.points.size(); }
+  int[] pixels = new int[total];
+  //List<Integer> c_list = new ArrayList<Integer>();
+  //IntList c_list = new IntList(512);
+  int pixel = 0;
+  for (Bar bar : bars) {
+    //int pix = 0;
+    for (LXPoint point : bar.points) {
+      pixels[pixel++] = point.index;
+      //if (pix++ >= 512) { break; }
+    }
+  }
+  //int[] c_array = c_list.toArray();
+  //channelMap.add(channel, c_array);
+  channelMap.add(channel, pixels);
+}
+
+
+/*
+  public void setChannelMap() {
+    ArrayList<int[]> channelmap = new ArrayList<int[]>();
+    for(int i=0; i<this.stripMap.size(); i++) {
+      IntList intce = new IntList(512);
+      List<String> striplist=this.stripMap.get(i);
+      for (String node1node2 : striplist) {
+         List<String> nodes = Arrays.asList(node1node2.split("_"));
+         Node node1 = this.nodemap.get(nodes.get(0));
+         Node node2 = this.nodemap.get(nodes.get(1));
+         List<LXPoint> nodetonodepoints = nodeToNodePoints(node1,node2);
+         for (LXPoint p : nodetonodepoints) {
+           intce.append(p.index);
+         }
+      }
+      int[] intcearray = intce.array();
+      channelmap.set(i,intcearray);
+    }
+    this.channelMap=channelmap;
+  }
+*/
 
 
 

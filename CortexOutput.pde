@@ -30,30 +30,22 @@ private final String ControllerIPs[] = {
 
 
 /* ********** Physical Limits on Channels ********************************** */
-int nPixPerChannel = 256; // OPC server is set to 512 pix per channel
-int nChannelPerBoard = 5;
-//int nChannelPerBoard = 48;
+int nPixPerChannel = 512; // OPC server is set to 512 pix per channel
+//int nChannelPerBoard = 5;
+int nChannelPerBoard = 15;
 
 /* ********** Create an array for each board mapping each pixel to a channel */
 
 int[] concatenateChannels(int boardNum) {
     // expects boardNum to be indexed starting at *1*
-    System.out.format("Cortex #%d: %s", boardNum, ControllerIPs[boardNum-1]);
-    //println("concatenating board " + boardNum);
+    System.out.format("Cortex #%d: %s\n", boardNum, ControllerIPs[boardNum-1]);
     int[] pixIndex = new int[nPixPerChannel*nChannelPerBoard];
     int boardOffset = (boardNum-1) * nChannelPerBoard; 
 
-    int pixels = 0;
     for (int i=boardOffset; i<boardOffset+nChannelPerBoard; i++) {
-        int[] channelIx = new int[mimsyChannelPixels];
-        for (int p = 0; p < mimsyChannelPixels; p++) { 
-          channelIx[p] = pixels++;
-        }
-        
-        //int[] channelIx = model.channelMap.get(i);
-        System.out.format(" -- adding channel %d: %5d pixels\n", i, channelIx.length);
+        int[] channelIx = channelMap.get(i);
+        System.out.format("adding channel %d, %d pix\n", i, channelIx.length);
         for(int j=0; j<channelIx.length; j++) {
-            //System.out.format(" ---- Pixel %8d\n",  i * nPixPerChannel - boardOffset*nPixPerChannel + j);
             //println( i * nPixPerChannel - boardOffset*nPixPerChannel + j);
             pixIndex[i * nPixPerChannel - boardOffset*nPixPerChannel + j] = channelIx[j];
         }

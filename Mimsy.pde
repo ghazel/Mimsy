@@ -26,6 +26,8 @@
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 // **************************************************** USER FRIENDLY GLOBALS
 
@@ -33,10 +35,10 @@ import java.util.*;
 
 static float RADIUS = 144.0;
 static int DD_THICKNESS = 10;
-static int TT_THICKNESS =  5;
+static int TT_THICKNESS =  8;
 
 
-static boolean DRAW_FACES        = true;
+static boolean DRAW_DODECAHEDRON = true;
 static boolean DRAW_FRABJOUS     = false;
 static boolean DRAW_TETRA_LEFT   = true;
 static boolean DRAW_TETRA_RIGHT  = true;
@@ -49,9 +51,13 @@ static int LIGHT_BRIGHTNESS = 50;
 //---------------- Output Hardware
 //String OUTPUT = "BeagleBone";
 //String OUTPUT = null;
-static boolean OUTPUT = false;
+static boolean OUTPUT = true;
 
 
+
+//---------------- Symmetry Validation
+boolean TEST_SYMMETRY = false;
+SymmetryTest symTest;
 
 
 
@@ -180,22 +186,26 @@ LXEffect getSelectedEffect() {
 */
 
 
-
-
 /** *************************************************************** MAIN SETUP
  * Set up models etc for whole package (Processing thing)
  * Fill out UI elements
  * Connect to output hardware
 ************************************************************************** **/
 void setup() {
-  size(1920, 1100, P3D);
-  //size(1200, 900, P3D);
+  //size(1920, 1100, P3D);
+  size(1200, 900, P3D);
   smooth(4);
   
   //==================================================================== Model 
   model = buildMimsyModel();
   System.out.format("Model Name: %s\n", model.layer);
   logTime("Finished Building Model");
+
+  if (TEST_SYMMETRY) {
+    symTest = new SymmetryTest(model);
+    symTest.runSymmetryTests();
+    exit();
+  }
   
   //===================================================================== P3LX
   
@@ -206,12 +216,18 @@ void setup() {
   
   // Set the patterns
   lx.setPatterns(new LXPattern[] {
+    new SymmetryPattern(lx),
+    new TestBarMatrix(lx),
     new MappingTetrahedron(lx),
+    new MappingDodecahedron(lx),
     new TetraBarTest(lx),
     new TetrahedronTest(lx),
-    //new CircleBounce(lx),
-    //new Psychedelic(lx),
-    //new StrobePattern(lx),
+    new TetraSymmetryFace(lx),
+    
+    new CircleBounce(lx),
+    new Psychedelic(lx),
+    new StrobePattern(lx),
+    
     //new ColorStatic(lx),
     //new WaveFrontPattern(lx),
     //new PixiePattern(lx),
@@ -300,7 +316,7 @@ void setup() {
   //************************************************************************* 2D UI
   lx.ui.addLayer(new UIChannelControl(lx.ui, lx.engine.getChannel(0), 4, 4));
   lx.ui.addLayer(new UISimulationControl(lx.ui, 4, 326));
-  lx.ui.addLayer(new UIEngineControl(lx.ui, 4, 406));
+  lx.ui.addLayer(new UIEngineControl(lx.ui, 4, 466));
   lx.ui.addLayer(new UIComponentsDemo(lx.ui, width-144, 4));
   
   logTime("Finished 2D Layer");
@@ -308,6 +324,7 @@ void setup() {
   //==================================================== Output to Controllers
   // create outputs via CortexOutput
   if (OUTPUT) {
+    buildChannelMap(model);
     buildOutputs();
     logTime("Built output clients");
   }

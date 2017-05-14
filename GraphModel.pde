@@ -7,6 +7,9 @@ public static class GraphModel extends LXModel {
   public List<GraphModel> subGraphs = new ArrayList<GraphModel>();
   public String layer;
   public List<String> layers = new ArrayList<String>();
+ 
+  // Connectivity matrix for looking up bars by (ordered) node pair
+  private Bar[][] barMatrix;
 
   //************************************************************* CONSTRUCTORS
   
@@ -15,8 +18,9 @@ public static class GraphModel extends LXModel {
    */
   public GraphModel() {
     super();
-    nodes = new Node[0];
-    bars = new Bar[0];
+    this.nodes = new Node[0];
+    this.bars = new Bar[0];
+    this.barMatrix = new Bar[0][0];
   }
 
   /*
@@ -26,6 +30,7 @@ public static class GraphModel extends LXModel {
     super(extractFixtures(bars));
     this.nodes = nodes;
     this.bars = bars;
+    this.addBarsToMatrix();
   }
   
   /*
@@ -49,10 +54,12 @@ public static class GraphModel extends LXModel {
     for (int b = 0; b < ordering.length; b++) {
       Node n1 = nodes[ordering[b][0]];
       Node n2 = nodes[ordering[b][1]];
-      System.out.format("Bar [%d]: %2d %2d\n", b, n1.index, n2.index);
+      System.out.format("Bar [%d]: %2d %2d / %2s %2s\n", 
+        b, n1.index, n2.index, dd.nodeNames[n1.index], dd.nodeNames[n2.index]);
       Bar bar = new Bar(n1, n2);
       bars[b] = bar;
-    } 
+    }
+    System.out.format("\n");
     return new GraphModel(nodes, bars);
   }
 
@@ -89,12 +96,14 @@ public static class GraphModel extends LXModel {
     return this;
   }
 
+
   /**
    * Add subgraphs to the model
    */
   public GraphModel addSubGraph(GraphModel graph) { 
     this.layers.add(graph.layer);
     this.subGraphs.add(graph);
+    this.addBarsToMatrix();
     return this;
   }
 
@@ -158,12 +167,41 @@ public static class GraphModel extends LXModel {
 
   //********************************************************************* BARS
 
+
+  private void addBarsToMatrix() {
+    if (barMatrix == null) {
+      System.out.format("CREATING BAR MATRIX [%d]\n", nodes.length);
+      // TODO: This should be this.nodes.length, but doing a crazy hack
+      // for now because tetrahedra only have 4 of the nodes, and those
+      // aren't consistent with the full context!
+      barMatrix = new Bar[dd.NODES][dd.NODES];
+    }
+    for (Bar bar : bars) {
+      int n1 = bar.node1.index;
+      int n2 = bar.node2.index;
+      if (barMatrix[n1][n2] == null) {
+        barMatrix[n1][n2] = bar;
+        barMatrix[n2][n1] = bar.reversed();
+      }
+    }
+  }
+    
+
+
   /*
    * Select a Bar matching given properties
    */
   public Bar getBar() {
     Random r = new Random();
     return bars[r.nextInt(bars.length)];
+  }
+
+  public Bar getBar(Node node1, Node node2) {
+    return getBar(node1.index, node2.index);
+  }
+
+  public Bar getBar(int node1, int node2) {
+    return this.barMatrix[node1][node2];
   }
 
 
@@ -234,30 +272,23 @@ public static class Bar extends LXModel {
   public Node node2;
   public int channel;
   public List<String> tags;
-  public boolean reversed;
+  public boolean isReversed;
   public Bar parent;
+  public Bar reverse;
+  public List<Bar> children;
 
   /** 
    * Full Constructor 
    */
-  public Bar(Node node1, Node node2, boolean reversed) {
-    super(new Fixture(node1, node2, reversed));
-    this.name     = node1.name + "-" + node2.name;
-    this.node1    = node1;
-    this.node2    = node2;
-    this.tags     = new ArrayList<String>();
-    this.reversed = reversed;
-  }
-
-
-
-  /**
-   * Typical constructor
-   */
   public Bar(Node node1, Node node2) {
-    this(node1, node2, false);
+    super(new Fixture(node1, node2));
+    this.name       = node1.name + "-" + node2.name;
+    this.node1      = node1;
+    this.node2      = node2;
+    this.tags       = new ArrayList<String>();
+    this.isReversed = false;
+    this.children   = new ArrayList<Bar>();
   }
-
 
   /**
    * Copy Constructor
@@ -272,9 +303,11 @@ public static class Bar extends LXModel {
   public Bar(Bar parent, boolean reversed) {
     super(new Fixture(parent.points, reversed));
     this.parent = parent;
+    parent.reverse = this;
+    parent.children.add(this);
     this.name = parent.name;
     this.tags = parent.tags;
-    this.reversed = reversed;
+    this.isReversed = reversed;
     
     if (reversed) {
       this.node1 = parent.node2;
@@ -289,7 +322,27 @@ public static class Bar extends LXModel {
    * Make a reversed copy of this bar
    */
   public Bar reversed() {
+    if (this.reverse != null) {
+      return this.reverse;
+    }
     return new Bar(this, true);
+  }
+
+  /**
+   * Get indexes for first and last points in the bar.
+   */
+  public int[] getPointRange() {
+    int min = points.get(0).index;
+    int max = points.get(points.size()-1).index;
+    return new int[]{min, max};
+  }
+
+  public int[] getPointIndexes() {
+    int[] indexes = new int[points.size()];
+    for (int i = 0; i < points.size(); i++) {
+      indexes[i] = points.get(i).index;
+    }
+    return indexes;
   }
 
 
@@ -302,27 +355,13 @@ public static class Bar extends LXModel {
         Collections.reverse(this.points); }
     }
 
-    private Fixture(Node node1, Node node2, boolean reversed) {
-      if (reversed) {
-        Node node_;
-        node_ = node2;
-        node2 = node1;
-        node1 = node_;
-      }
-
+    private Fixture(Node node1, Node node2) {
       PVector point;
-      int steps = PIXELS_PER_BAR + 2 * PIXEL_NODE_BUFFER;
-      float delta = 1.0 / (float)steps;
-        
-      //System.out.format(" ++ Lerp nodes - %8.2f %8.2f %8.2f - %8.2f %8.2f %8.2f\n",
-      //  node1.x, node1.y, node1.z, node2.x, node2.y, node2.z);
-
-      for (float p = PIXEL_NODE_BUFFER; p < steps; p++) {
-        point = PVector.lerp(node1, node2, p * delta);
+      float delta = 1.0 / (float)PIXELS_PER_BAR;
+      for (int i = 0; i < PIXELS_PER_BAR; i++) {
+        point = PVector.lerp(node1, node2, i * delta);
         LXPoint _point = new LXPoint(point.x, point.y, point.z);
         this.points.add(_point);
-        //System.out.format(" ++++ Point %5d - %8.2f %8.2f %8.2f - %8.2f %8.2f %8.2f\n",
-        //  _point.index, point.x, point.y, point.z, _point.x, _point.y, _point.z);
       }
     }
   }
@@ -335,5 +374,7 @@ public static LXFixture[] extractFixtures(Bar[] bars) {
   LXFixture[] fixtures = (LXFixture[]) bars;
   return fixtures;
 }
+
+
 
 

@@ -19,7 +19,7 @@ public static class Dodecahedron {
   public Net tetraLNet = new Net(5, 4, 6);
   public Net tetraRNet = new Net(5, 4, 6);
 
-  String[] nodeNames = new String[] {
+  public static final String[] nodeNames = new String[] {
     "A1","A2","A3","A4","A5",
     "B1","B2","B3","B4","B5",
     "C1","C2","C3","C4","C5",
@@ -133,24 +133,24 @@ public static class Dodecahedron {
         ct = cs;
         vt = rt*5 + ct;
         edges[vs][0] = vt;
-        System.out.format("VEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
-                          vs, rs, cs, vt, rt, ct);
+        //System.out.format("VEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
+        //                  vs, rs, cs, vt, rt, ct);
 
         // Horizontal Edges
         rt = rth;
         ct = (cs+co1)%5;
         vt = rt*5 + ct;
         edges[vs][1] = vt;
-        System.out.format("HEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
-                          vs, rs, cs, vt, rt, ct);
+        //System.out.format("HEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
+        //                  vs, rs, cs, vt, rt, ct);
 
         ct = (cs+co2)%5;
         vt = rt*5 + ct;
         edges[vs][2] = vt;
-        System.out.format("HEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
-                          vs, rs, cs, vt, rt, ct);
+        //System.out.format("HEdge   %3d# %2dr / %2dc   to   %3d# %2dr / %2dc\n", 
+        //                  vs, rs, cs, vt, rt, ct);
         faceNet.add_edges(0, vs, edges[vs]);
-        System.out.format("\n");
+        //System.out.format("\n");
       }
     }
   }
@@ -301,6 +301,8 @@ public static class Dodecahedron {
   //  Length of every edge is  0.713644 
 
 }
+
+
 
   
 
