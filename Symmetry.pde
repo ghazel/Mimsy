@@ -99,31 +99,36 @@ public static class Symmetry {
     public int modulus;
     // One (or more) steps of the operation to take
     public int[] steps;
-    // Translation map
-    public int[][] map;
+    // Translation maps
+    public int[]   base_map; // single step
+    public int[][] real_map; // base map applied to steps
+
     
     /**
      * Construct an element which take all steps
      */
-    public Element(Generator type, int[] nodes) {
-      this(type, nodes, new int[0]);
+    public Element(Generator type, int[] nodes, int[] map) {
+      this(type, nodes, new int[0], map);
     }
 
     /**
      * Construct an Element which takes a specific step
      */
-    public Element(Generator type, int[] nodes, int step) {
-      this(type, nodes, new int[]{step});
+    public Element(Generator type, int[] nodes, int step, int[] map) {
+      this(type, nodes, new int[]{step}, map);
     }
   
     /**
      * Construct an Element which takes specific steps
      */ 
-    public Element(Generator type, int[] nodes, int[] steps) {
+    public Element(Generator type, int[] nodes, int[] steps, int[] map) {
       this.type = type;
       this.nodes = nodes;;
       this.modulus = this.getModulus(type);
       this.steps = steps;
+      this.base_map = map;
+      this.applyMap();
+      
     }
 
     private int getModulus(Generator type) {
@@ -208,6 +213,8 @@ int[] arr = list.stream().mapToInt(i -> i).toArray();
       this.map = map;
       return this;
     }
+    public Element addMap(int[] map) {
+
   }
 
 
@@ -407,34 +414,56 @@ int[] arr = list.stream().mapToInt(i -> i).toArray();
   /**
    * Get the node map resulting from rotateing around a bar.
    */
-  public int[] getMapBar(int n1, int n2, int[] nodes) {
+  public int[] getMapBar(int n1, int n2, int steps) {
     return conjugate(reorient(new int[]{n1, n2}), xB);
   }
 
   /**
    * Apply 180 degrees around a bar to this symmetry object.
    */
-  public Symmetry rorateBar(Bar bar) {
-    return rotateBar(bar.node1.index, bar.node2.index);
-  }
-  
 
   public Symmetry rotateBar(Bar bar) {
-    return rotateBar(bar.node1.index, bar.node2.index);
+    return rotateBar(bar.node1.index, bar.node2.index, new int[]{1});
   }
 
-  public Symmetry rotateBar(int n1, int n2) {
-    Element elem = new Element(Generator.BAR, new int[]{n1,n2});
-    int[][] map = new int[symmetries][];
-    for (int s = 0; s < symmetries; s++) {
-      map[s] = getMapBar(n1, n2, xNodes.get(s));
-    }
-    elem.setMap(map);
+  public Symmetry rotateBar(int n1, int n2, int step) {
+    return rotateBar(n1, n2, new int[]{step};
+  }
+  
+  public Symmetry rotateBar(int n1, int n2, int[] steps) {
+    int[] map = getMapBar(n1, n2);
+    Element elem = new Element(Generator.BAR, new int[]{n1,n2}, steps, map);
     addElement(elem);
     return this;
   }
   
-  //****************************************************************** METHODS
+
+  //********************************************************* QUERY SYMMETRIES
+
+  public Node[] getSymmetricNodes(Node refNode) {
+    Node[] symNodes = new Node[symmetries];
+    for (int i = 0; i < symmetries; i++) {
+      symNodes[i] = nodes[xNodes.get(i)[refNode.index]];
+    }
+    return symNodes;
+  }
+
+  public Bar[] getSymmetricBars(Bar refBar) {
+    out("  Ref Bar    [%2d][%2d]\n", refBar.node1.index, refBar.node2.index);
+    Node[] symNodes1 = getSymmetricNodes(refBar.node1);
+    Node[] symNodes2 = getSymmetricNodes(refBar.node2);
+    
+    Bar[] symBars = new Bar[symmetries];
+    Bar symBar;
+    for (int i = 0; i < symmetries; i++) {
+      symBar = model.getBar(symNodes1[i], symNodes2[i]);
+      symBars[i] = symBar;
+      out("  Sym Bar %2d [%2d][%2d]\n", i, symBar.node1.index, symBar.node2.index);
+    }
+    return symBars;
+  }
+
+  //****************************************************************** DRAWING
 
   /**
    * Clear the symmetry color template for the next frame
@@ -483,29 +512,6 @@ int[] arr = list.stream().mapToInt(i -> i).toArray();
     clear();
   }
 
-
-  public Node[] getSymmetricNodes(Node refNode) {
-    Node[] symNodes = new Node[symmetries];
-    for (int i = 0; i < symmetries; i++) {
-      symNodes[i] = nodes[xNodes.get(i)[refNode.index]];
-    }
-    return symNodes;
-  }
-
-  public Bar[] getSymmetricBars(Bar refBar) {
-    out("  Ref Bar    [%2d][%2d]\n", refBar.node1.index, refBar.node2.index);
-    Node[] symNodes1 = getSymmetricNodes(refBar.node1);
-    Node[] symNodes2 = getSymmetricNodes(refBar.node2);
-    
-    Bar[] symBars = new Bar[symmetries];
-    Bar symBar;
-    for (int i = 0; i < symmetries; i++) {
-      symBar = model.getBar(symNodes1[i], symNodes2[i]);
-      symBars[i] = symBar;
-      out("  Sym Bar %2d [%2d][%2d]\n", i, symBar.node1.index, symBar.node2.index);
-    }
-    return symBars;
-  }
 }
 
 
