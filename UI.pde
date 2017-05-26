@@ -7,7 +7,7 @@
 
 
 
-class UIVertices extends UI3dComponent {
+class UINodes extends UI3dComponent {
 
   private final float NODE_RADIUS = 10.0;
   private String COLOR_SCHEME = "LEVEL_COLOR";
@@ -107,12 +107,12 @@ class UISimulationControl extends UIWindow {
     y = UIWindow.TITLE_LABEL_HEIGHT;
     new UIButton(4, y, width-8, 20)
       .setLabel("Show Walls")
-      .setParameter(walls.visible)
+      .setParameter(uiWalls.visible)
       .addToContainer(this);
     y += 24;
     new UIButton(4, y, width-8, 20)
-      .setLabel("Show Vertices")
-      .setParameter(vertices.visible)
+      .setLabel("Show Nodes")
+      .setParameter(uiNodes.visible)
       .addToContainer(this);
     y += 24;
 
@@ -251,24 +251,3 @@ class UIComponentsDemo extends UIWindow {
     setSize(width, y);
   }
 } 
-
-
-
-public class UICameraControl extends UIWindow {
-
-  public final static int WIDTH = 140;
-  public final static int HEIGHT = 72;
-
-  public UICameraControl(UI ui, UI3dContext context, float x, float y) {
-    super(ui, "CAMERA", x, y, WIDTH, HEIGHT);
-
-    float xp = 5;
-    float yp = UIWindow.TITLE_LABEL_HEIGHT;
-    new UIKnob(xp, yp).setParameter(context.perspective).addToContainer(this);
-    xp += 34;
-    new UIKnob(xp, yp).setParameter(context.depth).addToContainer(this);
-  }
-
-}
-
-
