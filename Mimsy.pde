@@ -192,6 +192,10 @@ LXEffect getSelectedEffect() {
  * Connect to output hardware
 ************************************************************************** **/
 void setup() {
+
+  startMillis = System.currentTimeMillis();
+  lastMillis = startMillis;
+
   //size(1920, 1100, P3D);
   size(1200, 900, P3D);
   smooth(4);
@@ -217,7 +221,10 @@ void setup() {
   // Set the patterns
   lx.setPatterns(new LXPattern[] {
     new SymmetryPattern(lx),
+    new SymmetryTestPattern(lx),
     new TestBarMatrix(lx),
+
+    /*
     new MappingTetrahedron(lx),
     new MappingDodecahedron(lx),
     new TetraBarTest(lx),
@@ -227,6 +234,7 @@ void setup() {
     new CircleBounce(lx),
     new Psychedelic(lx),
     new StrobePattern(lx),
+    */
     
     //new ColorStatic(lx),
     //new WaveFrontPattern(lx),
@@ -292,6 +300,7 @@ void setup() {
   
     .setRadius(1000)
     .setPerspective(0)
+    //.setDepth(4)
     .setCenter(model.cx, model.cy, model.cz)
 
     .setPhi(-PI/2) // Rotate around X
@@ -318,6 +327,7 @@ void setup() {
   lx.ui.addLayer(new UISimulationControl(lx.ui, 4, 326));
   lx.ui.addLayer(new UIEngineControl(lx.ui, 4, 466));
   lx.ui.addLayer(new UIComponentsDemo(lx.ui, width-144, 4));
+  //lx.ui.addLayer(new UICameraControl(lx.ui, 4, 600));
   
   logTime("Finished 2D Layer");
 
@@ -339,7 +349,6 @@ void draw() {
   //background(#888888);
   // ...and everything else is handled by P3LX!
   drawFPS();
-
 
   // DMK:  Somewhat strongly suspect cubic gamma on APA102 is wild overkill, but we'll check /
   //       add as a config
@@ -365,7 +374,9 @@ void draw() {
 //************************************************************ AUX SUBROUTINES
 //------------------------------------------------------------------ FPS Meter
 long simulationNanos = 0;
-int startMillis, lastMillis;
+static long startMillis = System.currentTimeMillis();
+static long lastMillis = startMillis;
+
 int FPS_TARGET = 60;  
 boolean DRAW_FPS = true;
 void drawFPS() {  
@@ -379,8 +390,39 @@ void drawFPS() {
 
 //-------------------------------------------------------------------- Logger
 public void logTime(String evt) {
+  out(evt);
+  return;
+  /*
   int now = millis();
   System.out.format("%5d ms: %s\n", (now - lastMillis), evt);
   lastMillis = now;
+  */
 }  
-    
+
+
+import java.text.SimpleDateFormat;
+public static void mark() {
+  lastMillis = System.currentTimeMillis();
+}
+
+public static void out(String format, Object... args) {
+  String timeStamp = new SimpleDateFormat("HH:mm:ss")
+                         .format(new Date());
+  //int now = millis();
+  long now = System.currentTimeMillis();
+  long dif = now - lastMillis;
+  String prefix = String.format("%s (%5d ms): ", timeStamp, dif);
+  System.out.format(prefix);
+  System.out.format(format, args);
+  if (!format.endsWith("\n")) { 
+    System.out.format("\n");
+  }
+  lastMillis = now;
+}
+
+
+public static void outStatic(String format, Object... args) {
+  System.out.format(format, args);
+}
+
+

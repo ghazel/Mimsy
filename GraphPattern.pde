@@ -1,3 +1,14 @@
+/** Pattern Ideas.
+ *
+ * Tracers extend from a single node along all bars of dodecahedron.
+ * Split and recombine at each node but keep tracing greater graph distance. 
+ * Color bars/points as a function of graph distance. Sparkle tetrahedra bars
+ * whenever getting to a point connecting back to first node (i.e. at graph
+ * distance 3). Color Tetrahedra by lerp from node colors.
+ *
+ */
+
+
 
 public abstract class GraphPattern extends LXPattern {
 
@@ -7,16 +18,196 @@ public abstract class GraphPattern extends LXPattern {
     super(lx);
     this.model = (GraphModel) lx.model;    
   }
+
+  public void fade(List<LXPoint> points, float fade) {
+    for (LXPoint p : points) {
+      colors[p.index] =
+        LXColor.scaleBrightness(colors[p.index], fade);
+    }      
+  }
+
+
 }
-
-
 
 
 
 //*********************************************************** SYMMETRY PATTERN
 
 
+
+
 class SymmetryPattern extends GraphPattern {
+
+  /*
+  private final BoundedParameter barRate 
+    = new BoundedParameter("BAR",  5000, 0, 60000);
+  private final BoundedParameter nodeRate 
+    = new BoundedParameter("NODE",  5000, 0, 60000);
+  private final BoundedParameter faceRate 
+    = new BoundedParameter("FACE",  5000, 0, 60000);
+  */
+
+
+  private final BoundedParameter runRate 
+    = new BoundedParameter("RUN",  5000, 0, 60000);
+  private final BoundedParameter spinRate 
+    = new BoundedParameter("SPIN",  100.0, 1.0, 10000.0);
+  private final BoundedParameter fadeRate =
+    new BoundedParameter("FADE", 0.1, 0.0, 1.0);
+  private final SinLFO barPos = new SinLFO(0.0, 1.0, runRate);
+  
+  private final BoundedParameter colorSpread
+    = new BoundedParameter("dHUE", 30.0, 0.0, 360.0);
+  private final BoundedParameter colorSaturation
+    = new BoundedParameter("SAT",  70.0, 0.0, 100.0);
+  private final BoundedParameter colorSaturationRange
+    = new BoundedParameter("dSAT", 50.0, 0.0, 100.0);
+  private final BoundedParameter colorBrightness
+    = new BoundedParameter("BRT",  30.0, 0.0, 100.0);
+  private final BoundedParameter colorBrightnessRange
+    = new BoundedParameter("dBRT", 50.0, 0.0, 100.0);
+  private float baseHue = 0.0;
+
+
+  List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
+  List<GraphModel> TLModels = new ArrayList<GraphModel>();
+  List<GraphModel> TRModels = new ArrayList<GraphModel>();
+  // Want the first bar of each tetrahedra
+  List<Bar> TLBars = new ArrayList<Bar>();
+  List<Bar> TRBars = new ArrayList<Bar>();
+  
+  LXPoint point;
+  double totalMs;
+  double lastSpin;
+  double lastSwitch;
+  double lastReset;
+  int nodeI = 0;
+  boolean toggle = false;
+  float hue =   0.0;
+  float sat = 100.0;
+  float brt = 100.0;
+
+  int barPosI;
+  int lastBarPosI;
+  Bar symBar;
+  Element symBarE;
+
+
+
+  Symmetry sym = new Symmetry(model);
+  Element baseFace = sym.rotateFace(0, 1, 0);
+
+  SymmetryPattern(LX lx) {
+    super(lx);
+    //addParameter(barRate);
+    //addParameter(nodeRate);
+    //addParameter(faceRate);
+    
+    addParameter(runRate);
+    addParameter(spinRate);
+    addParameter(fadeRate);
+    addModulator(barPos).start();
+
+    addParameter(colorSpread);
+    addParameter(colorSaturation);
+    addParameter(colorSaturationRange);
+    addParameter(colorBrightness);
+    addParameter(colorBrightnessRange);
+
+    for (GraphModel g: model.getLayer(TL).subGraphs) { 
+      tetrahedra.add(g);
+      TLModels.add(g);
+      TLBars.add(g.bars[0]);
+    }
+    for (GraphModel g: model.getLayer(TR).subGraphs) { 
+      tetrahedra.add(g);
+      TRModels.add(g);
+      TRBars.add(g.bars[0]);
+    }
+
+    baseFace.bloom();
+
+  }
+
+  public void run(double deltaMs) {
+
+    totalMs += deltaMs;
+    fade(model.points, 1.0 - (fadeRate.getValuef() * (float)deltaMs / 1000.0));
+
+    float dHue = colorSpread.getValuef();
+    float bSat = colorSaturation.getValuef();
+    float dSat = colorSaturationRange.getValuef();
+    float bBrt = colorBrightness.getValuef();
+    float dBrt = colorBrightnessRange.getValuef();
+
+    hue = (hue + dHue * (float)deltaMs / 1000.0) % 360.0;
+
+
+    float delayReset = 60000; 
+    float delaySwitch = 5000;
+    // Reset symmetry
+    if ((totalMs - lastReset) > delayReset) {
+      sym.reset();
+      lastReset = totalMs;
+    }
+
+    //if ((totalMs - lastSwitch) > delaySwitch) {
+    //  switchBar();
+    //}
+
+
+
+
+
+    // Spin the point around
+    /*
+    float spinMs = 10.0 / (float)Math.log(spinRate.getValuef());
+    out("Spinning after %.2f Ms (%.2f)", spinMs, totalMs-lastSpin);
+    if ((totalMs-lastSpin) > spinMs) {
+      out("!! SPIN !!");
+      baseFace.addStep();
+      lastSpin = totalMs;
+    }
+    */
+
+    Bar bar = TLBars.get(0);
+    barPosI = (int)Math.floor(barPos.getValuef() * (float)bar.points.size());
+    barPosI = LXUtils.constrain(barPosI, 0, bar.points.size()-1);
+    for (int i = lastBarPosI; i <= barPosI; i++) {
+      LXPoint point = bar.points.get(i);
+      int c = lx.hsb(hue,sat,brt);
+      sym.template[point.index] = c;
+    }
+    lastBarPosI = barPosI;
+    if (barPosI == 0) {
+      switchBar();
+    }
+    if (barPosI >= (bar.points.size() - 1)) {
+      switchBar();
+    }
+
+    //for (LXPoint p: bar.points) {
+      //colors[p.index] = lx.hsb(hue,sat,brt);
+      //out("Coloring pixel %d #%h\n", p.index, c);
+    //}
+    sym.draw(colors);
+
+  }
+
+  void switchBar() {
+    sym.pop();
+    symBar = model.getRandomBar();
+    symBarE = sym.rotateBar(symBar);
+    lastSwitch = totalMs;
+    sym.push(baseFace);
+  }
+
+}
+
+//****************************************************** SYMMETRY TEST PATTERN
+
+
+class SymmetryTestPattern extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -35,10 +226,18 @@ class SymmetryPattern extends GraphPattern {
   List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
   double diffMs;
+  double totalMs;
+  double lastSwitch;
+  int nodeI = 0;
+  boolean toggle = false;
+  float hue =   0.0;
+  float sat = 100.0;
+  float brt = 100.0;
+
 
   Symmetry sym = new Symmetry(model);
 
-  SymmetryPattern(LX lx) {
+  SymmetryTestPattern(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -53,42 +252,58 @@ class SymmetryPattern extends GraphPattern {
 
   public void run(double deltaMs) {
 
-    int symBarI = 0;
-    Bar symBar;
-    diffMs += deltaMs;
-    if (diffMs >= 1000) {
-      symBar = model.bars[symBarI];
-      sym.rotateBar(symBar);
-      //sym.rotateBar(model.getBar(0,1));
-      diffMs = 0.0;
-    }
-    for (int i = 0; i < colors.length; i++) { 
-      colors[i] = lx.hsb(0.0, 0.0, 0.0);
-    }
-
-
-    float hue = 0.;
-    float sat = 100.0;
-    float brt = 100.0;
-   
-    /* 
     float dHue = colorSpread.getValuef();
     float bSat = colorSaturation.getValuef();
     float dSat = colorSaturationRange.getValuef();
     float bBrt = colorBrightness.getValuef();
     float dBrt = colorBrightnessRange.getValuef();
 
-    baseHue += Math.log(cycleSpeed.getValuef());
-    baseHue %= 360.;
-    */
+    int symBarI = 0;
+    Bar symBar;
+    Node symNode;
+    Element symBarE;
+    Element symNodeE;
+    diffMs += deltaMs;
+    totalMs += deltaMs;
     
+
+    // Switch nodes every 30 seconds
+    if ((totalMs - lastSwitch) > 30000) {
+      sym.reset();
+      nodeI = (nodeI + 1) % model.nodes.length;
+      lastSwitch = totalMs;
+    }
+
+    if (diffMs >= 1000) {
+      hue = (hue + dHue) % 360.0;
+      if (toggle) {
+        symBar = model.getRandomBar();
+        symBarE = sym.rotateBar(symBar);
+        //symBarE.setStep(new int[]{0,1});
+      } else if (deltaMs < 2000) {
+        //symNode = model.getRandomNode();
+        symNode = model.nodes[nodeI];
+        symNodeE = sym.rotateNode(symNode);
+        symNodeE.setStep(new int[]{0,1,2});
+      }
+
+      toggle = !toggle;
+      diffMs = 0.0;
+    }
+    
+    /*
+    for (int i = 0; i < colors.length; i++) { 
+      colors[i] = lx.hsb(0.0, 0.0, 0.0);
+    }
+    */
+
     GraphModel tetra = tetrahedra.get(0);
     Bar bar = tetra.bars[0];
     for (LXPoint p: bar.points) {
       //colors[p.index] = lx.hsb(hue,sat,brt);
       int c = lx.hsb(hue,sat,brt);
       sym.template[p.index] = c;
-      out("Coloring pixel %d %d\n", p.index, c);
+      //out("Coloring pixel %d #%h\n", p.index, c);
     }
     sym.draw(colors);
 
@@ -431,7 +646,7 @@ class TestBarMatrix extends GraphPattern {
   
   private final DiscreteParameter method = new DiscreteParameter("GEN", 1, 1, 5);
   private final BoundedParameter speed = new BoundedParameter("SPD",  5000, 0, 10000);
-  private final BoundedParameter fade =
+  private final BoundedParameter fadeRate =
     new BoundedParameter("FADE", 10.0, 0.0, 1000.0);
 
   //private final SinLFO xPeriod = new SinLFO(100, 1000, 10000); 
@@ -452,7 +667,7 @@ class TestBarMatrix extends GraphPattern {
     super(lx);
     addParameter(method);
     addParameter(speed);
-    addParameter(fade);
+    addParameter(fadeRate);
     addModulator(position).start();
     //for (GraphModel g: model.tetraL.subGraphs) { tetrahedra.add(g); }
     //for (GraphModel g: model.tetraR.subGraphs) { tetrahedra.add(g); }
@@ -469,11 +684,7 @@ class TestBarMatrix extends GraphPattern {
     lastPos = thisPos;
 
     // Fade everything
-    float fadeScale = fade.getValuef() * (float)deltaMs / 1000.0;
-    for (LXPoint p : model.points) {
-     //colors[p.index] =
-     //    LXColor.scaleBrightness(colors[p.index], fadeScale);
-    }    
+    fade(model.points, fadeRate.getValuef() * (float)deltaMs / 1000.0);
 
     int M = method.getValuei();
     

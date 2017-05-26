@@ -251,3 +251,24 @@ class UIComponentsDemo extends UIWindow {
     setSize(width, y);
   }
 } 
+
+
+
+public class UICameraControl extends UIWindow {
+
+  public final static int WIDTH = 140;
+  public final static int HEIGHT = 72;
+
+  public UICameraControl(UI ui, UI3dContext context, float x, float y) {
+    super(ui, "CAMERA", x, y, WIDTH, HEIGHT);
+
+    float xp = 5;
+    float yp = UIWindow.TITLE_LABEL_HEIGHT;
+    new UIKnob(xp, yp).setParameter(context.perspective).addToContainer(this);
+    xp += 34;
+    new UIKnob(xp, yp).setParameter(context.depth).addToContainer(this);
+  }
+
+}
+
+

@@ -167,6 +167,17 @@ public static class GraphModel extends LXModel {
 
   //********************************************************************* BARS
 
+  public Node getRandomNode() {
+    Random randomized = new Random();
+    return nodes[randomized.nextInt(nodes.length)];
+  }
+
+
+  public Bar getRandomBar() {
+    Random randomized = new Random();
+    return bars[randomized.nextInt(bars.length)];
+  }
+
 
   private void addBarsToMatrix() {
     if (barMatrix == null) {
