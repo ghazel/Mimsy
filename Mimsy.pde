@@ -35,7 +35,7 @@ static final int UI_LIGHT_BRIGHTNESS = 50; // half bright
 //---------------- Mimsy Physical Parameters
 static float RADIUS = 144.0;
 static int DODECAHEDRON_BAR_THICKNESS = 10;
-static int TETRAHEDRON_BAR_THICKNESS =  8;
+static int TETRAHEDRON_BAR_THICKNESS =  5;
 
 
 //---------------- Which Components to Draw
@@ -49,7 +49,8 @@ static boolean DRAW_CUBIC        = false; // not implemented
 //---------------- Output Hardware
 //String OUTPUT = "BeagleBone";
 //String OUTPUT = null;
-static boolean OUTPUT = true;
+//static boolean OUTPUT = true;
+static boolean OUTPUT = false;
 
 
 
@@ -65,6 +66,7 @@ LXPattern[] patterns(LX lx) {
     new SymmetryPattern(lx),
     new SymmetryTestPattern(lx),
     new TestBarMatrix(lx),
+    new Psychedelic(lx),
 
     /*
     new MappingTetrahedron(lx),
@@ -74,7 +76,6 @@ LXPattern[] patterns(LX lx) {
     new TetraSymmetryFace(lx),
     
     new CircleBounce(lx),
-    new Psychedelic(lx),
     new StrobePattern(lx),
     */
     

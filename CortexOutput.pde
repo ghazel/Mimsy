@@ -15,10 +15,6 @@ import java.net.Socket;
 import heronarts.lx.LX;
 import java.util.*;
 
-
-//private int mimsyChannelPixels = 123;
-private int mimsyChannelPixels = 123;
-
 private final String ControllerIPs[] = {
   "192.168.1.85",
   //"192.168.1.81",

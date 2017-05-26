@@ -32,6 +32,10 @@ UI3dComponent pointCloudTetraRight;
 UI3dComponent uiWalls;
 UI3dComponent uiNodes;
 
+public BooleanParameter uiOrthoCamera = new BooleanParameter("Ortho");
+
+public BoundedParameter clipNear = new BoundedParameter("Clip Near", 0, 0, 100);
+public BoundedParameter clipFar = new BoundedParameter("Clip Far", 100, 0, 100);
 
 
 
@@ -158,6 +162,7 @@ void setup() {
     // A camera layer makes an OpenGL layer that we can easily 
     // pivot around with the mouse
     new UI3dContext(lx.ui) {
+
       protected void beforeDraw(UI ui, PGraphics pg) {
         int H = UI_LIGHT_HUE;
         int S = UI_LIGHT_SATURATION;
@@ -178,8 +183,14 @@ void setup() {
             }
           }
         }
-
-        
+  
+        int scale = 6;
+        if (uiOrthoCamera.isOn()) {
+          ortho(-width/scale, width/scale, 
+                -height/scale, height/scale,
+                clipNear.getValuef() * radius.getValuef() / 100.0,
+                clipFar.getValuef() * radius.getValuef() / 100.0 * 2.0);
+        }
         hint(ENABLE_DEPTH_TEST);
       }
       protected void afterDraw(UI ui, PGraphics pg) {
@@ -194,7 +205,7 @@ void setup() {
     .setPerspective(0)
     //.setDepth(4)
     .setCenter(model.cx, model.cy, model.cz)
-    .setPhi(-PI/2) // Rotate model around X
+    //.setPhi(-PI/2) // Rotate model around X
     //.setTheta(-PI/2) // Rotate around Y
     
 
@@ -215,10 +226,10 @@ void setup() {
   //=========================================================== 2D Control GUI
   UI2dContext[] layers = new UI2dContext[] {
     // Left Side
-    new UIChannelControl   (lx.ui, lx.engine.getChannel(0), 4,   4),
-    new UISimulationControl(lx.ui,                          4, 326),
-    new UIEngineControl    (lx.ui,                          4, 466),
-    new UICameraControl    (lx.ui, uiContext,               4, 600),
+    new UIChannelControl      (lx.ui, lx.engine.getChannel(0), 4,   4),
+    new UISimulationControl   (lx.ui,                          4, 326),
+    new UIEngineControl       (lx.ui,                          4, 466),
+    new UICameraControlMimsy  (lx.ui, uiContext,               4, 600),
 
     // Right Side
     new UIComponentsDemo   (lx.ui,                          width-144, 4),

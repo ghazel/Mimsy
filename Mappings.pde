@@ -4,9 +4,17 @@ static int PIXELS_BETWEEN_BARS = 1;
 static int PIXELS_PER_CHANNEL = 123;
 static int PIXEL_NODE_BUFFER = 2;
 
+/** MINI MIMSY (CHANDELIER) */
+/*
 static int PIXELS_DODECAHEDRON = 24;
 static int PIXELS_TETRA_LEFT = 50;
 static int PIXELS_TETRA_RIGHT = 54;
+*/
+
+/** DEMO */
+static int PIXELS_DODECAHEDRON = 200;
+static int PIXELS_TETRA_LEFT = 200;
+static int PIXELS_TETRA_RIGHT = 200;
 
 int FACES_BAR_ORDER[][] =
   new int[][] {{}};

@@ -1,10 +1,3 @@
-/**
- * Here's a simple extension of a camera component. This will be
- * rendered inside the camera view context. We just override the
- * onDraw method and invoke Processing drawing methods directly.
- */
-
-
 
 
 class UINodes extends UI3dComponent {
@@ -251,3 +244,36 @@ class UIComponentsDemo extends UIWindow {
     setSize(width, y);
   }
 } 
+
+
+public class UICameraControlMimsy extends UIWindow {
+
+  public final static int WIDTH = 140;
+  public final static int HEIGHT = 102;
+
+  public UICameraControlMimsy(UI ui, UI3dContext context, float x, float y) {
+    super(ui, "CAMERA", x, y, WIDTH, HEIGHT);
+    
+    float xp = 5;
+    float yp = UIWindow.TITLE_LABEL_HEIGHT;
+
+    new UIButton(xp, yp, WIDTH-8, 20)
+      .setLabel("Ortho Persp")
+      .setActiveLabel("Orthoscopic")
+      .setInactiveLabel("Perspective")
+      .setParameter(uiOrthoCamera)
+      .addToContainer(this);
+    yp += 24;
+    new UIKnob(xp, yp).setParameter(context.perspective).addToContainer(this);
+    xp += 34;
+    new UIKnob(xp, yp).setParameter(context.depth).addToContainer(this);
+    xp += 34;
+    new UIKnob(xp, yp).setParameter(clipNear).addToContainer(this);
+    xp += 34;
+    new UIKnob(xp, yp).setParameter(clipFar).addToContainer(this);
+  }
+
+}
+
+
+

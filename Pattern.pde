@@ -116,8 +116,8 @@ class Psychedelic extends LXPattern {
   double ms = 0.0;
   double offset = 0.0;
   private final BoundedParameter colorScheme = new BoundedParameter("SCM", 0, 3);
-  private final BoundedParameter cycleSpeed = new BoundedParameter("SPD",  10, 0, 200);
-  private final BoundedParameter colorSpread = new BoundedParameter("LEN", 5, 2, 1000);
+  private final BoundedParameter cycleSpeed = new BoundedParameter("SPD",  5, 0, 200);
+  private final BoundedParameter colorSpread = new BoundedParameter("LEN", 50, 2, 1000);
   private final BoundedParameter colorHue = new BoundedParameter("HUE",  0., 0., 359.);
   private final BoundedParameter colorSat = new BoundedParameter("SAT", 80., 0., 100.);
   private final BoundedParameter colorBrt = new BoundedParameter("BRT", 50., 0., 100.);
