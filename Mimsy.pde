@@ -63,6 +63,7 @@ SymmetryTest symTest;
 //---------------- Patterns
 LXPattern[] patterns(LX lx) {
   return new LXPattern[] {
+  
     new SymmetryPattern(lx),
     new SymmetryTestPattern(lx),
     new TestBarMatrix(lx),
@@ -138,6 +139,3 @@ class Effects {
     
 
     
-
-
-

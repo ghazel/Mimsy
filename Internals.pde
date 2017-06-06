@@ -21,7 +21,7 @@ static GraphModel model;
 P3LX lx;
 
 LXPattern[]       patterns;
-LXTransition[]    transitions;
+//LXTransition[]    transitions;
 Effects           effects;
 LXEffect[]        effectsArr;
 
@@ -56,9 +56,9 @@ LXChannel R;
 
 //************************************* Engine Construction and Initialization
 
-LXTransition _transition(P3LX lx) {
-  return new DissolveTransition(lx).setDuration(1000);
-}
+//LXTransition _transition(P3LX lx) {
+//  return new DissolveTransition(lx).setDuration(1000);
+//}
 
 /*
 LXPattern[] _leftPatterns(P3LX lx) {
@@ -320,5 +320,3 @@ public static void out(String format, Object... args) {
   }
   lastMillis = now;
 }
-
-

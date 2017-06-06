@@ -236,7 +236,7 @@ class UIComponentsDemo extends UIWindow {
     
     new UILabel(4, y, width-8, 24)
     .setLabel("This is just a label.")
-    .setAlignment(CENTER, CENTER)
+    .setTextAlignment(CENTER, CENTER)
     .setBorderColor(ui.theme.getControlDisabledColor())
     .addToContainer(this);
     y += 28;
@@ -274,6 +274,3 @@ public class UICameraControlMimsy extends UIWindow {
   }
 
 }
-
-
-

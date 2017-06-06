@@ -19,7 +19,7 @@ public abstract class GraphPattern extends LXPattern {
     this.model = (GraphModel) lx.model;    
   }
 
-  public void fade(List<LXPoint> points, float fade) {
+  public void fade(LXPoint[] points, float fade) {
     for (LXPoint p : points) {
       colors[p.index] =
         LXColor.scaleBrightness(colors[p.index], fade);
@@ -171,10 +171,10 @@ class SymmetryPattern extends GraphPattern {
     */
 
     Bar bar = TLBars.get(0);
-    barPosI = (int)Math.floor(barPos.getValuef() * (float)bar.points.size());
-    barPosI = LXUtils.constrain(barPosI, 0, bar.points.size()-1);
+    barPosI = (int)Math.floor(barPos.getValuef() * (float)bar.points.length);
+    barPosI = LXUtils.constrain(barPosI, 0, bar.points.length-1);
     for (int i = lastBarPosI; i <= barPosI; i++) {
-      LXPoint point = bar.points.get(i);
+      LXPoint point = bar.points[i];
       int c = lx.hsb(hue,sat,brt);
       sym.template[point.index] = c;
     }
@@ -182,7 +182,7 @@ class SymmetryPattern extends GraphPattern {
     if (barPosI == 0) {
       switchBar();
     }
-    if (barPosI >= (bar.points.size() - 1)) {
+    if (barPosI >= (bar.points.length - 1)) {
       switchBar();
     }
 
@@ -562,7 +562,7 @@ class MappingTetrahedron extends GraphPattern {
     GraphModel tetraL = model.getLayer(TL).getLayer(0);
     GraphModel tetraR = model.getLayer(TR).getLayer(0);
     Bar bar0 = tetraL.bars[0];
-    float dHue = hueRange / ((float)tetraL.bars.length) / ((float)bar0.points.size());
+    float dHue = hueRange / ((float)tetraL.bars.length) / ((float)bar0.points.length);
     float hue = 0.0;
     for (int b = 0; b < tetraL.bars.length; b++) {
       Bar bar = tetraL.bars[b];
@@ -622,7 +622,7 @@ class MappingDodecahedron extends GraphPattern {
     //GraphModel tetraL = model.getLayer(TL).getLayer(0);
     //GraphModel tetraR = model.getLayer(TR).getLayer(0);
     Bar bar0 = dodeca.bars[0];
-    //float dHue = hueRange / ((float)dodeca.bars.length) / ((float)bar0.points.size());
+    //float dHue = hueRange / ((float)dodeca.bars.length) / ((float)bar0.points.length);
     //float dHue = hueRange / ((float)dodeca.bars.length);
     float dHue = 30.0;
     float hue = 0.0;
@@ -693,7 +693,7 @@ class TestBarMatrix extends GraphPattern {
       int i, s;
       for (Bar _bar : model.bars) {
         Bar bar = _bar;
-        s = bar.points.size();
+        s = bar.points.length;
         i = LXUtils.constrain((int)((float)s * thisPos), 0, s-1);
         if (rev) { 
           bar = _bar.reversed();
@@ -702,7 +702,7 @@ class TestBarMatrix extends GraphPattern {
         }
         //System.out.format("Bar[%2d][%2d] R: %s   P: %8.2f   S: %3d   I: %3d\n",
         //  bar.node1.index, bar.node2.index, rev, thisPos, s, i);
-        colors[bar.points.get(i).index] = lx.hsb(hue,sat,brt);
+        colors[bar.points[i].index] = lx.hsb(hue,sat,brt);
       }
     
     // Chase up one bar and back down its reverse by looking it up in barMatrix
@@ -710,7 +710,7 @@ class TestBarMatrix extends GraphPattern {
       int i, s;
       for (Bar _bar : model.bars) {
         Bar bar = _bar;
-        s = bar.points.size();
+        s = bar.points.length;
         i = LXUtils.constrain((int)((float)s * thisPos), 0, s-1);
         if (rev) { 
           bar = model.getBar(bar.node2, bar.node1);
@@ -719,7 +719,7 @@ class TestBarMatrix extends GraphPattern {
         }
         //System.out.format("Bar[%2d][%2d] R: %s   P: %8.2f   S: %3d   I: %3d\n",
         //  bar.node1.index, bar.node2.index, rev, thisPos, s, i);
-        colors[bar.points.get(i).index] = lx.hsb(hue,sat,brt);
+        colors[bar.points[i].index] = lx.hsb(hue,sat,brt);
       }
      
     // Color by bar direction
@@ -827,8 +827,3 @@ class TetraSymmetryFace extends GraphPattern {
     }
   }
 }
-
-
-
-
-
