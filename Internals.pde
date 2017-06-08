@@ -22,7 +22,7 @@ P3LX lx;
 
 LXPattern[]       patterns;
 //LXTransition[]    transitions;
-Effects           effects;
+//Effects           effects;
 LXEffect[]        effectsArr;
 
 UI3dContext uiContext;
