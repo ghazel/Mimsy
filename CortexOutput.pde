@@ -220,49 +220,47 @@ public class CortexOutput extends LXOutput {
 //// add UI components for the hardware, allowing enable/disable
 
 //class UIOutput extends UIWindow {
-//  UIOutput(UI ui, float x, float y, float w, float h) {
-//    super(ui, "OUTPUT", x, y, w, h);
-//    float yPos = UIWindow.TITLE_LABEL_HEIGHT - 2;
-//    List<UIItemList.Item> items = new ArrayList<UIItemList.Item>();
-//    items.add(new OutputItem());
+// UIOutput(UI ui, float x, float y, float w, float h) {
+//   super(ui, "OUTPUT", x, y, w, h);
+//   float yPos = UIWindow.TITLE_LABEL_HEIGHT - 2;
+//   List<UIItemList.Item> items = new ArrayList<UIItemList.Item>();
+//   items.add(new OutputItem());
 
-//    new UIItemList(1, yPos, width-2, 260)
-//      .setItems(items)
-//      .addToContainer(this);
-//  }
+//   new UIItemList.BasicList(ui, 1, yPos, width-2, 260)
+//   .setItems(items)
+//   .addToContainer(this);
+// }
 
-//  class OutputItem extends UIItemList.AbstractItem {
-//    OutputItem() {
-//      for (CortexOutput ch : cortexList) {
-//        ch.enabled.addListener(new LXParameterListener() {
-//          public void onParameterChanged(LXParameter parameter) { 
-//            redraw();
-//          }
-//        }
-//        );
-//      }
-//    } 
-//    String getLabel() { 
-//      return "ALL CHANNELS";
-//    }
-//    boolean isSelected() { 
-//      // jut check the first one, since they either should all be on or all be off
-//      return cortexList.get(0).enabled.isOn();
-//    }
-//    void onMousePressed() { 
-//      for (CortexOutput ch : cortexList) { 
-//        ch.enabled.toggle();
-//        if (ch.enabled.isOn()) {
-//          ch.connect();
-//        }
-//        else {
+// class OutputItem extends UIItemList.AbstractItem {
+//   OutputItem() {
+//     for (CortexOutput ch : cortexList) {
+//       ch.enabled.addListener(new LXParameterListener() {
+//         public void onParameterChanged(LXParameter parameter) { 
+//           redraw();
+//         }
+//       }
+//       );
+//     }
+//   } 
+//   String getLabel() { 
+//     return "ALL CHANNELS";
+//   }
+//   boolean isSelected() { 
+//     // jut check the first one, since they either should all be on or all be off
+//     return cortexList.get(0).enabled.isOn();
+//   }
+//   void onMousePressed() { 
+//     for (CortexOutput ch : cortexList) { 
+//       ch.enabled.toggle();
+//       if (ch.enabled.isOn()) {
+//         ch.connect();
+//       }
+//       else {
 ////          ch.closeChannel();
-//          ch.dispose();
-//        }
-//      }
-//    } // end onMousePressed
-//  }
+//         ch.dispose();
+//       }
+//     }
+//   } // end onMousePressed
+// }
   
 //}
-
-//---------------------------------------------------------------------------------------------

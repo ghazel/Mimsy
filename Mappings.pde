@@ -162,6 +162,7 @@ public void buildChannelMap(GraphModel model) {
 
 public void addBarsToChannel(Bar[] bars, int channel) {
   int total = 0;
+  for (Bar bar : bars) { total += bar.points.length; }
   int[] pixels = new int[total];
   //List<Integer> c_list = new ArrayList<Integer>();
   //IntList c_list = new IntList(512);

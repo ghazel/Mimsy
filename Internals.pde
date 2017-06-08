@@ -125,6 +125,40 @@ void setup() {
   model = buildMimsyModel();
   System.out.format("Model Name: %s\n", model.layer);
   out("Finished Building Model");
+  
+  
+  
+  
+  //from tenere
+   try {
+    lx = new LXStudio(this, model, false) {
+      public void initialize(LXStudio lx, LXStudio.UI ui) {
+        //lx.engine.registerComponent("tenereSettings", new Settings(lx, ui));
+        lx.registerEffect(BlurEffect.class);
+        lx.registerEffect(DesaturationEffect.class);
+        // TODO: the UDP output instantiation will go in here!
+        out("Initialized LXStudio");
+      }
+      
+      public void onUIReady(LXStudio lx, LXStudio.UI ui) {
+        ui.preview.setRadius(80*FEET).setPhi(-PI/18).setTheta(PI/12);
+        ui.preview.setCenter(0, model.cy - 2*FEET, 0);
+        //ui.preview.addComponent(new UISimulation());       
+        ui.preview.pointCloud.setVisible(false); //TODO doesnt work
+       
+        
+        // Narrow angle lens, for a fuller visualization
+        ui.preview.perspective.setValue(30);
+
+       // uiTreeControls = (UITreeControls) new UITreeControls(ui).addToContainer(ui.leftPane.global);
+        out("Initialized LX UI");
+      }
+    };
+  } catch (Exception x) {
+    x.printStackTrace();
+  }
+  //end from tenere
+  
 
   if (TEST_SYMMETRY) {
     symTest = new SymmetryTest(model);
@@ -134,110 +168,114 @@ void setup() {
   
   //===================================================================== P3LX
 
-  lx = new P3LX(this, model);
-  lx.setPatterns(patterns(lx));
-  out("Finished Loading Patterns");
+  lx = new LXStudio(this, model, false);
+  //anything that extends LXPattern gets loaded automatically now (using reflection)
+  
+  //lx.setPatterns(patterns(lx));
+  //out("Finished Loading Patterns");
   
   //================================================================= 3D Model
-
-  //-------------- Prepare 3D Reference Elements
-  uiWalls = new UIWalls();
-  uiWalls.setVisible(false);
-  uiNodes = new UINodes();
   
-  //-------------- Prepare 3D Point Clouds
-  pointCloudDodecahedron 
-    = new UIPointCloud(lx, model.getLayer(DD))
-          .setPointSize(DODECAHEDRON_BAR_THICKNESS);
-  pointCloudTetraLeft
-    = new UIPointCloud(lx, model.getLayer(TL))
-          .setPointSize(TETRAHEDRON_BAR_THICKNESS);
-  pointCloudTetraRight
-    = new UIPointCloud(lx, model.getLayer(TR))
-          .setPointSize(TETRAHEDRON_BAR_THICKNESS);
 
 
-  //-------------- Build the 3D UI
-  uiContext = 
-    // A camera layer makes an OpenGL layer that we can easily 
-    // pivot around with the mouse
-    new UI3dContext(lx.ui) {
-
-      protected void beforeDraw(UI ui, PGraphics pg) {
-        int H = UI_LIGHT_HUE;
-        int S = UI_LIGHT_SATURATION;
-        int B = UI_LIGHT_BRIGHTNESS;
-
-        //-------- Lights!
-        for (float mx : new float[]{model.xMin, model.xMax}) {
-          for (float my : new float[]{model.yMin, model.yMax}) {
-            for (float mz : new float[]{model.zMin, model.zMax}) {
-              float x = mx*10;
-              float y = my*10;
-              float z = mz*10;
-              pointLight(H,S,B, x, y, z);
-              pushMatrix();
-              translate(x,y,z);
-              sphere(10.0);
-              popMatrix();
-            }
-          }
-        }
+  ////-------------- Prepare 3D Reference Elements
+  //uiWalls = new UIWalls();
+  //uiWalls.setVisible(false);
+  //uiNodes = new UINodes();
   
-        int scale = 6;
-        if (uiOrthoCamera.isOn()) {
-          ortho(-width/scale, width/scale, 
-                -height/scale, height/scale,
-                clipNear.getValuef() * radius.getValuef() / 100.0,
-                clipFar.getValuef() * radius.getValuef() / 100.0 * 2.0);
-        }
-        hint(ENABLE_DEPTH_TEST);
-      }
-      protected void afterDraw(UI ui, PGraphics pg) {
-        // Turn off the lights and kill depth testing before the 2D layers
-        noLights();
-        hint(DISABLE_DEPTH_TEST);
-      } 
-    }
+  ////-------------- Prepare 3D Point Clouds
+  //pointCloudDodecahedron 
+  //  = new UIPointCloud(lx, model.getLayer(DD))
+  //        .setPointSize(DODECAHEDRON_BAR_THICKNESS);
+  //pointCloudTetraLeft
+  //  = new UIPointCloud(lx, model.getLayer(TL))
+  //        .setPointSize(TETRAHEDRON_BAR_THICKNESS);
+  //pointCloudTetraRight
+  //  = new UIPointCloud(lx, model.getLayer(TR))
+  //        .setPointSize(TETRAHEDRON_BAR_THICKNESS);
+
+
+  ////-------------- Build the 3D UI
+  //uiContext = 
+  //  // A camera layer makes an OpenGL layer that we can easily 
+  //  // pivot around with the mouse
+  //  new UI3dContext(lx.ui) {
+
+  //    protected void beforeDraw(UI ui, PGraphics pg) {
+  //      int H = UI_LIGHT_HUE;
+  //      int S = UI_LIGHT_SATURATION;
+  //      int B = UI_LIGHT_BRIGHTNESS;
+
+  //      //-------- Lights!
+  //      for (float mx : new float[]{model.xMin, model.xMax}) {
+  //        for (float my : new float[]{model.yMin, model.yMax}) {
+  //          for (float mz : new float[]{model.zMin, model.zMax}) {
+  //            float x = mx*10;
+  //            float y = my*10;
+  //            float z = mz*10;
+  //            pointLight(H,S,B, x, y, z);
+  //            pushMatrix();
+  //            translate(x,y,z);
+  //            sphere(10.0);
+  //            popMatrix();
+  //          }
+  //        }
+  //      }
   
-    //------------ Camera!
-    .setRadius(1000)
-    .setPerspective(0)
-    //.setDepth(4)
-    .setCenter(model.cx, model.cy, model.cz)
-    //.setPhi(-PI/2) // Rotate model around X
-    //.setTheta(-PI/2) // Rotate around Y
+  //      int scale = 6;
+  //      if (uiOrthoCamera.isOn()) {
+  //        ortho(-width/scale, width/scale, 
+  //              -height/scale, height/scale,
+  //              clipNear.getValuef() * radius.getValuef() / 100.0,
+  //              clipFar.getValuef() * radius.getValuef() / 100.0 * 2.0);
+  //      }
+  //      hint(ENABLE_DEPTH_TEST);
+  //    }
+  //    protected void afterDraw(UI ui, PGraphics pg) {
+  //      // Turn off the lights and kill depth testing before the 2D layers
+  //      noLights();
+  //      hint(DISABLE_DEPTH_TEST);
+  //    } 
+  //  }
+  
+  //  //------------ Camera!
+  //  .setRadius(1000)
+  //  .setPerspective(0)
+  //  //.setDepth(4)
+  //  .setCenter(model.cx, model.cy, model.cz)
+  //  //.setPhi(-PI/2) // Rotate model around X
+  //  //.setTheta(-PI/2) // Rotate around Y
     
 
-    //------------ Action! (actually just some stuff)
-    // Let's add a point cloud of our animation points
-    //.addComponent(pointCloud = new UIPointCloud(lx, model).setPointSize(BAR_THICKNESS))
-    .addComponent(pointCloudDodecahedron)
-    .addComponent(pointCloudTetraLeft)
-    .addComponent(pointCloudTetraRight)
-    // And a custom UI object of our own
-    .addComponent(uiWalls)
-    .addComponent(uiNodes)
-  ;
+  //  //------------ Action! (actually just some stuff)
+  //  // Let's add a point cloud of our animation points
+  //  //.addComponent(pointCloud = new UIPointCloud(lx, model).setPointSize(BAR_THICKNESS))
+  //  .addComponent(pointCloudDodecahedron)
+  //  .addComponent(pointCloudTetraLeft)
+  //  .addComponent(pointCloudTetraRight)
+  //  // And a custom UI object of our own
+  //  .addComponent(uiWalls)
+  //  .addComponent(uiNodes)
+  //;
 
-  lx.ui.addLayer(uiContext);
-  out("Finished 3D Layer");
+  //lx.ui.addLayer(uiContext);
+  //out("Finished 3D Layer");
   
-  //=========================================================== 2D Control GUI
-  UI2dContext[] layers = new UI2dContext[] {
-    // Left Side
-    new UIChannelControl      (lx.ui, lx.engine.getChannel(0), 4,   4),
-    new UISimulationControl   (lx.ui,                          4, 326),
-    new UIEngineControl       (lx.ui,                          4, 466),
-    new UICameraControlMimsy  (lx.ui, uiContext,               4, 600),
+  ////=========================================================== 2D Control GUI
+  //UI2dContext[] layers = new UI2dContext[] {
+  //  // Left Side
+  //  new UIChannelControl      (lx.ui, lx.engine.getChannel(0), 4,   4),
+  //  new UISimulationControl   (lx.ui,                          4, 326),
+  //  new UIEngineControl       (lx.ui,                          4, 466),
+  //  new UICameraControlMimsy  (lx.ui, uiContext,               4, 600),
 
-    // Right Side
-    new UIComponentsDemo   (lx.ui,                          width-144, 4),
-  };
+  //  // Right Side
+  //  new UIComponentsDemo   (lx.ui,                          width-144, 4),
+  //};
   
-  for (UI2dContext layer : layers) {
-    lx.ui.addLayer(layer);
-  }
+  //for (UI2dContext layer : layers) {
+  //  lx.ui.addLayer(layer);
+  //}
 
 
   

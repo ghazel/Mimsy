@@ -14,7 +14,7 @@ public abstract class GraphPattern extends LXPattern {
 
   GraphModel model;
 
-  protected GraphPattern(LX lx) {
+  public GraphPattern(LX lx) {
     super(lx);
     this.model = (GraphModel) lx.model;    
   }
@@ -36,7 +36,7 @@ public abstract class GraphPattern extends LXPattern {
 
 
 
-class SymmetryPattern extends GraphPattern {
+public class SymmetryPattern extends GraphPattern {
 
   /*
   private final BoundedParameter barRate 
@@ -97,7 +97,7 @@ class SymmetryPattern extends GraphPattern {
   Symmetry sym = new Symmetry(model);
   Element baseFace = sym.rotateFace(0, 1, 0);
 
-  SymmetryPattern(LX lx) {
+  public SymmetryPattern(LX lx) {
     super(lx);
     //addParameter(barRate);
     //addParameter(nodeRate);
@@ -207,7 +207,7 @@ class SymmetryPattern extends GraphPattern {
 //****************************************************** SYMMETRY TEST PATTERN
 
 
-class SymmetryTestPattern extends GraphPattern {
+public class SymmetryTestPattern extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -237,7 +237,7 @@ class SymmetryTestPattern extends GraphPattern {
 
   Symmetry sym = new Symmetry(model);
 
-  SymmetryTestPattern(LX lx) {
+  public SymmetryTestPattern(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -336,7 +336,7 @@ class SymmetryTestPattern extends GraphPattern {
  * Light each bar a different color, and blank the black pixel
  ****************************************************************************/
 
-class TetraBarTest extends GraphPattern {
+public class TetraBarTest extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -355,7 +355,7 @@ class TetraBarTest extends GraphPattern {
   List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
 
-  TetraBarTest(LX lx) {
+  public TetraBarTest(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -408,7 +408,7 @@ class TetraBarTest extends GraphPattern {
  * Light each tetrahedron a different color, and blank the black pixel
  ****************************************************************************/
 
-class TetrahedronTest extends GraphPattern {
+public class TetrahedronTest extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -427,7 +427,7 @@ class TetrahedronTest extends GraphPattern {
   List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
 
-  TetrahedronTest(LX lx) {
+  public TetrahedronTest(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -486,7 +486,7 @@ class TetrahedronTest extends GraphPattern {
  ****************************************************************************/
 
 /*
-class TetrahedronTest extends LXPattern {
+public class TetrahedronTest extends LXPattern {
   private final BoundedParameter colorSpread
       = new BoundedParameter("CLR", 60.0, 0.0, 360.0);
   private final BoundedParameter cycleSpeed 
@@ -504,7 +504,7 @@ class TetrahedronTest extends LXPattern {
   private int pixelsPerChannel = 123;
   private int channelCount = 5;
 
-  TetrahedronTest(LX lx) {
+  public TetrahedronTest(LX lx) {
     super(lx);
     addParameter(colorSpread);
     addParameter(cycleSpeed);
@@ -531,7 +531,7 @@ class TetrahedronTest extends LXPattern {
  * Show the mapping for a single channel of a tetrahedron.
  ****************************************************************************/
 
-class MappingTetrahedron extends GraphPattern {
+public class MappingTetrahedron extends GraphPattern {
 
   float hueRange = 270.f;
   //float dHue     =  30.f;
@@ -541,7 +541,7 @@ class MappingTetrahedron extends GraphPattern {
 
   LXPoint point;
 
-  MappingTetrahedron(LX lx) {
+  public MappingTetrahedron(LX lx) {
     super(lx);
     //for (GraphModel g: model.tetraL.subGraphs) { tetrahedra.add(g); }
     //for (GraphModel g: model.tetraR.subGraphs) { tetrahedra.add(g); }
@@ -590,7 +590,7 @@ class MappingTetrahedron extends GraphPattern {
  * Show the mapping for a single channel of a tetrahedron.
  ****************************************************************************/
 
-class MappingDodecahedron extends GraphPattern {
+public class MappingDodecahedron extends GraphPattern {
 
   float hueRange = 270.f;
   //float dHue     =  30.f;
@@ -600,7 +600,7 @@ class MappingDodecahedron extends GraphPattern {
 
   LXPoint point;
 
-  MappingDodecahedron(LX lx) {
+  public MappingDodecahedron(LX lx) {
     super(lx);
     //for (GraphModel g: model.tetraL.subGraphs) { tetrahedra.add(g); }
     //for (GraphModel g: model.tetraR.subGraphs) { tetrahedra.add(g); }
@@ -642,7 +642,7 @@ class MappingDodecahedron extends GraphPattern {
  *
  ****************************************************************************/
 
-class TestBarMatrix extends GraphPattern {
+public class TestBarMatrix extends GraphPattern {
   
   private final DiscreteParameter method = new DiscreteParameter("GEN", 1, 1, 5);
   private final BoundedParameter speed = new BoundedParameter("SPD",  5000, 0, 10000);
@@ -663,7 +663,7 @@ class TestBarMatrix extends GraphPattern {
 
   LXPoint point;
 
-  TestBarMatrix(LX lx) {
+  public TestBarMatrix(LX lx) {
     super(lx);
     addParameter(method);
     addParameter(speed);
@@ -762,7 +762,7 @@ class TestBarMatrix extends GraphPattern {
 
 
 
-class TetraSymmetryFace extends GraphPattern {
+public class TetraSymmetryFace extends GraphPattern {
 
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
@@ -781,7 +781,7 @@ class TetraSymmetryFace extends GraphPattern {
   List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
 
-  TetraSymmetryFace(LX lx) {
+  public TetraSymmetryFace(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
