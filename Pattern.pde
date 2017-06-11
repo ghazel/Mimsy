@@ -3,7 +3,7 @@
  * concepts and tools of the LX framework.
  */
  
-class LayerDemoPattern extends LXPattern {
+public class LayerDemoPattern extends LXPattern {
   
   private final BoundedParameter colorSpread = new BoundedParameter("Clr", 0.5, 0, 3);
   private final BoundedParameter stars = new BoundedParameter("Stars", 100, 0, 100);
@@ -23,12 +23,12 @@ class LayerDemoPattern extends LXPattern {
     // The layers run automatically
   }
   
-  private class CircleLayer extends LXLayer {
+  public class CircleLayer extends LXLayer {
     
     private final SinLFO xPeriod = new SinLFO(3400, 7900, 11000); 
     private final SinLFO brightnessX = new SinLFO(model.xMin, model.xMax, xPeriod);
   
-    private CircleLayer(LX lx) {
+    public CircleLayer(LX lx) {
       super(lx);
       addModulator(xPeriod).start();
       addModulator(brightnessX).start();
@@ -42,7 +42,7 @@ class LayerDemoPattern extends LXPattern {
         float distanceFromCenter = dist(p.x, p.y, model.cx, model.cy);
         float distanceFromBrightness = dist(p.x, abs(p.y - model.cy), brightnessX.getValuef(), yWave);
         colors[p.index] = LXColor.hsb(
-          lx.getBaseHuef() + colorSpread.getValuef() * distanceFromCenter,
+          palette.getHuef() + colorSpread.getValuef() * distanceFromCenter,
           100,
           max(0, 100 - falloff*distanceFromBrightness)
         );
@@ -50,12 +50,12 @@ class LayerDemoPattern extends LXPattern {
     }
   }
   
-  private class RodLayer extends LXLayer {
+  public class RodLayer extends LXLayer {
     
     private final SinLFO zPeriod = new SinLFO(2000, 5000, 9000);
     private final SinLFO zPos = new SinLFO(model.zMin, model.zMax, zPeriod);
     
-    private RodLayer(LX lx) {
+    public RodLayer(LX lx) {
       super(lx);
       addModulator(zPeriod).start();
       addModulator(zPos).start();
@@ -66,7 +66,7 @@ class LayerDemoPattern extends LXPattern {
         float b = 100 - dist(p.x, p.y, model.cx, model.cy) - abs(p.z - zPos.getValuef());
         if (b > 0) {
           addColor(p.index, LXColor.hsb(
-            lx.getBaseHuef() + p.z,
+            palette.getHuef() + p.z,
             100,
             b
           ));
@@ -75,14 +75,14 @@ class LayerDemoPattern extends LXPattern {
     }
   }
   
-  private class StarLayer extends LXLayer {
+  public class StarLayer extends LXLayer {
     
     private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
     private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
     
     private int index = 0;
     
-    private StarLayer(LX lx) { 
+    public StarLayer(LX lx) { 
       super(lx);
       addModulator(maxBright).start();
       addModulator(brightness).start();
@@ -97,7 +97,7 @@ class LayerDemoPattern extends LXPattern {
       if (brightness.getValuef() <= 0) {
         pickStar();
       } else {
-        addColor(index, LXColor.hsb(lx.getBaseHuef(), 50, brightness.getValuef()));
+        addColor(index, LXColor.hsb(palette.getHuef(), 50, brightness.getValuef()));
       }
     }
   }
@@ -111,7 +111,7 @@ class LayerDemoPattern extends LXPattern {
  * Demo pattern for GeneratorPalette.
  * @author scouras
  ************************************************************************** */
-class Psychedelic extends LXPattern {
+public class Psychedelic extends LXPattern {
  
   double ms = 0.0;
   double offset = 0.0;
@@ -179,7 +179,7 @@ class Psychedelic extends LXPattern {
 
 
 /*
-class StarBurst extends LXPattern {
+public class StarBurst extends LXPattern {
 
   // new bursts per minute
   private final BoundedParameter burstRate =
@@ -195,11 +195,11 @@ class StarBurst extends LXPattern {
   private double lastBurst;
 
 
-  StarBurst(LX lx) { 
+  public StarBurst(LX lx) { 
     super(lx);
   }
 
-  class Burst {
+  public class Burst {
     public Node node;
     public Layer layer;
     public double offset;
@@ -272,7 +272,7 @@ class StarBurst extends LXPattern {
 /** ****************************************************** RAINBOW BARREL ROLL
  * A colored plane of light rotates around an axis
  ************************************************************************* **/
-class RainbowBarrelRoll extends LXPattern {
+public class RainbowBarrelRoll extends LXPattern {
    float hoo;
    float anglemod = 0;
     
@@ -296,13 +296,13 @@ class RainbowBarrelRoll extends LXPattern {
 
 
 /** ***************************************************************** GRADIENT
- * Example class making use of LXPalette's X/Y/Z interpolation to set
+ * Example public class making use of LXPalette's X/Y/Z interpolation to set
  * the color of each point in the model
  * @author Scouras
  ************************************************************************* **/
 
-class GradientPattern extends LXPattern {
-  GradientPattern(LX lx) {
+public class GradientPattern extends LXPattern {
+  public GradientPattern(LX lx) {
     super(lx);
   }
   
@@ -318,8 +318,8 @@ class GradientPattern extends LXPattern {
 /*****************************************************************************
  *    PATTERNS PRIMARILY INTENDED TO DEMO CONCEPTS, BUT NOT BE DISPLAYED
  ****************************************************************************/
-class BlankPattern extends LXPattern {
-  BlankPattern(LX lx) {
+public class BlankPattern extends LXPattern {
+  public BlankPattern(LX lx) {
     super(lx);
   }
   
@@ -334,7 +334,7 @@ class BlankPattern extends LXPattern {
 /** ************************************************************ CIRCLE BOUNCE
  * A plane bounces up and down the brain, making a circle of color.
  ************************************************************************** */
-class CircleBounce extends LXPattern {
+public class CircleBounce extends LXPattern {
   
   private final BoundedParameter bounceSpeed 
       = new BoundedParameter("BNC",  1000, 0, 10000);
@@ -353,7 +353,7 @@ class CircleBounce extends LXPattern {
 
   public void run(double deltaMs) {}
 
-  private class CircleLayer extends LXLayer {
+  public class CircleLayer extends LXLayer {
     private final SinLFO xPeriod = new SinLFO(model.zMin, model.zMax, bounceSpeed);
 
     private CircleLayer(LX lx) {
@@ -366,7 +366,7 @@ class CircleBounce extends LXPattern {
       for (LXPoint p : model.points) {
         float distanceFromBrightness = abs(xPeriod.getValuef() - p.z);
         colors[p.index] = LXColor.hsb(
-          lx.getBaseHuef() + colorSpread.getValuef(),
+          palette.getHuef() + colorSpread.getValuef(),
           100.0,
           max(0.0, 100.0 - falloff*distanceFromBrightness)
         );
@@ -388,7 +388,7 @@ class CircleBounce extends LXPattern {
  * @author Geoff Schmiddt
  ************************************************************************* **/
 /*
-class PixiePattern extends LXPattern{
+public class PixiePattern extends LXPattern{
   // How many pixies are zipping around.
   private final BoundedParameter numPixies =
       new BoundedParameter("NUM", 100, 0, 1000);
@@ -406,7 +406,7 @@ class PixiePattern extends LXPattern{
   private final BoundedParameter colorSat = new BoundedParameter("SAT", 63.0, 0.0, 100.0);
 
 
-  class Pixie {
+  public class Pixie {
     public Node fromNode, toNode;
     public double offset;
     public int kolor;
@@ -516,7 +516,7 @@ class PixiePattern extends LXPattern{
  * @author Geoff Schmidt
  ************************************************************************* **/
 
-class StrobePattern extends LXPattern{
+public class StrobePattern extends LXPattern{
   private final BoundedParameter speed = new BoundedParameter("SPD",  5000, 0, 10000);
   private final BoundedParameter min = new BoundedParameter("MIN",  60, 10, 500);
   private final BoundedParameter max = new BoundedParameter("MAX",  500, 0, 2000);
@@ -570,7 +570,7 @@ class StrobePattern extends LXPattern{
 /** ******************************************************************** MOIRE
  * Moire patterns, computed across the actual topology of the brain.
  *
- * Basically this is the classic demoscene Moire effect:
+ * Basically this is the public classic demoscene Moire effect:
  * http://www.youtube.com/watch?v=XtCW-axRJV8&t=2m54s
  *
  * but distance is defined as the actual shortest path along the bars,
@@ -589,7 +589,7 @@ class StrobePattern extends LXPattern{
 
 
 /*
-class MovableDistanceField {
+public class MovableDistanceField {
   private LXPoint origin;
   double width;
   int[] distanceField;
@@ -611,7 +611,7 @@ class MovableDistanceField {
   }
 };
 
-class MoireManifoldPattern extends LXPattern{
+public class MoireManifoldPattern extends LXPattern{
   // Stripe width (generator field periodicity), in pixels
   private final BoundedParameter width = new BoundedParameter("WID", 65, 500);
   // Rate of movement of generator centers, in pixels per second
@@ -625,7 +625,7 @@ class MoireManifoldPattern extends LXPattern{
 
   ArrayList<Generator> generators = new ArrayList<Generator>();
 
-  class Generator extends MovableDistanceField {
+  public class Generator extends MovableDistanceField {
     boolean smooth = false;
 
     double contributionAtPoint(LXPoint where) {
@@ -707,7 +707,7 @@ class MoireManifoldPattern extends LXPattern{
  ************************************************************************* **/
 
 /*
-class WaveFrontPattern extends LXPattern {
+public class WaveFrontPattern extends LXPattern {
   // Number of splats
   private final DiscreteParameter numSplats =
       new DiscreteParameter("NUM", 4, 1, 10 + 1);
@@ -721,7 +721,7 @@ class WaveFrontPattern extends LXPattern {
   private final BoundedParameter width =
       new BoundedParameter("WID", 30, 0, 250);
 
-  class Splat extends MovableDistanceField {
+  public class Splat extends MovableDistanceField {
     double age; // seconds
     double size; // pixels
     double walkSpeed;
@@ -831,7 +831,7 @@ class WaveFrontPattern extends LXPattern {
  ************************************************************************* **/
 
 /* 
-class ColorStatic extends LXPattern {
+public class ColorStatic extends LXPattern {
  
   ArrayList<LXPoint> current_points = new ArrayList<LXPoint>();
   ArrayList<LXPoint> random_points = new ArrayList<LXPoint>();

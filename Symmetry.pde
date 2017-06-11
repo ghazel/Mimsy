@@ -221,7 +221,7 @@ public static class Symmetry {
    */
   public final GraphModel model;
   public final Node[] nodes;
-  public final List<LXPoint> points;
+  public final LXPoint[] points;
   public final Kind kind;
 
   /**
@@ -275,8 +275,8 @@ public static class Symmetry {
     this.model = model;
     this.nodes = model.nodes;
     this.points = model.points;
-    this.template = new int[model.points.size()];
-    //this.template = new ArrayList<LXColor>(model.points.size());
+    this.template = new int[model.points.length];
+    //this.template = new ArrayList<LXColor>(model.points.length);
    
     // Populate all the symmetry operations 
     this.ID = new int[nodes.length];
@@ -673,7 +673,7 @@ public static class Symmetry {
    * Clear the symmetry color template for the next frame
    */
   public void clear() {
-    template = new int[points.size()];
+    template = new int[points.length];
     //template = new LinkedList<Integer>();
   }
 
@@ -710,7 +710,7 @@ public static class Symmetry {
         if (template[indexes[i]] != 0) {
           colored++;
           for (Bar symBar : symBars) {
-            symPoint = symBar.points.get(i).index;
+            symPoint = symBar.points[i].index;
             colors[symPoint] = template[refPoint];
           }
         }
@@ -721,8 +721,3 @@ public static class Symmetry {
   }
 
 }
-
-
-
-
-

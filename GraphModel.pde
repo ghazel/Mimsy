@@ -147,7 +147,7 @@ public static class GraphModel extends LXModel {
    */
   public LXPoint getRandomPoint() {
     Random randomized = new Random();
-    return this.points.get(randomized.nextInt(points.size()));
+    return this.points[randomized.nextInt(points.length)];
   }
 
   /**
@@ -343,15 +343,15 @@ public static class Bar extends LXModel {
    * Get indexes for first and last points in the bar.
    */
   public int[] getPointRange() {
-    int min = points.get(0).index;
-    int max = points.get(points.size()-1).index;
+    int min = points[0].index;
+    int max = points[points.length-1].index;
     return new int[]{min, max};
   }
 
   public int[] getPointIndexes() {
-    int[] indexes = new int[points.size()];
-    for (int i = 0; i < points.size(); i++) {
-      indexes[i] = points.get(i).index;
+    int[] indexes = new int[points.length];
+    for (int i = 0; i < points.length; i++) {
+      indexes[i] = points[i].index;
     }
     return indexes;
   }
@@ -359,7 +359,7 @@ public static class Bar extends LXModel {
 
   private static class Fixture extends LXAbstractFixture {
 
-    private Fixture(List<LXPoint> points, boolean reversed) {
+    private Fixture(LXPoint[] points, boolean reversed) {
       for (LXPoint p : points) {
         this.points.add(p); }
       if (reversed) {
@@ -385,7 +385,3 @@ public static LXFixture[] extractFixtures(Bar[] bars) {
   LXFixture[] fixtures = (LXFixture[]) bars;
   return fixtures;
 }
-
-
-
-

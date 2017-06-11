@@ -14,12 +14,12 @@ public abstract class GraphPattern extends LXPattern {
 
   GraphModel model;
 
-  protected GraphPattern(LX lx) {
+  public GraphPattern(LX lx) {
     super(lx);
     this.model = (GraphModel) lx.model;    
   }
 
-  public void fade(List<LXPoint> points, float fade) {
+  public void fade(LXPoint[] points, float fade) {
     for (LXPoint p : points) {
       colors[p.index] =
         LXColor.scaleBrightness(colors[p.index], fade);
@@ -36,7 +36,7 @@ public abstract class GraphPattern extends LXPattern {
 
 
 
-class SymmetryPattern extends GraphPattern {
+public class SymmetryPattern extends GraphPattern {
 
   /*
   private final BoundedParameter barRate 
@@ -97,7 +97,7 @@ class SymmetryPattern extends GraphPattern {
   Symmetry sym = new Symmetry(model);
   Element baseFace = sym.rotateFace(0, 1, 0);
 
-  SymmetryPattern(LX lx) {
+  public SymmetryPattern(LX lx) {
     super(lx);
     //addParameter(barRate);
     //addParameter(nodeRate);
@@ -171,10 +171,10 @@ class SymmetryPattern extends GraphPattern {
     */
 
     Bar bar = TLBars.get(0);
-    barPosI = (int)Math.floor(barPos.getValuef() * (float)bar.points.size());
-    barPosI = LXUtils.constrain(barPosI, 0, bar.points.size()-1);
+    barPosI = (int)Math.floor(barPos.getValuef() * (float)bar.points.length);
+    barPosI = LXUtils.constrain(barPosI, 0, bar.points.length-1);
     for (int i = lastBarPosI; i <= barPosI; i++) {
-      LXPoint point = bar.points.get(i);
+      LXPoint point = bar.points[i];
       int c = lx.hsb(hue,sat,brt);
       sym.template[point.index] = c;
     }
@@ -182,7 +182,7 @@ class SymmetryPattern extends GraphPattern {
     if (barPosI == 0) {
       switchBar();
     }
-    if (barPosI >= (bar.points.size() - 1)) {
+    if (barPosI >= (bar.points.length - 1)) {
       switchBar();
     }
 
@@ -207,7 +207,7 @@ class SymmetryPattern extends GraphPattern {
 //****************************************************** SYMMETRY TEST PATTERN
 
 
-class SymmetryTestPattern extends GraphPattern {
+public class SymmetryTestPattern extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -237,7 +237,7 @@ class SymmetryTestPattern extends GraphPattern {
 
   Symmetry sym = new Symmetry(model);
 
-  SymmetryTestPattern(LX lx) {
+  public SymmetryTestPattern(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -336,7 +336,7 @@ class SymmetryTestPattern extends GraphPattern {
  * Light each bar a different color, and blank the black pixel
  ****************************************************************************/
 
-class TetraBarTest extends GraphPattern {
+public class TetraBarTest extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -355,7 +355,7 @@ class TetraBarTest extends GraphPattern {
   List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
 
-  TetraBarTest(LX lx) {
+  public TetraBarTest(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -408,7 +408,7 @@ class TetraBarTest extends GraphPattern {
  * Light each tetrahedron a different color, and blank the black pixel
  ****************************************************************************/
 
-class TetrahedronTest extends GraphPattern {
+public class TetrahedronTest extends GraphPattern {
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
@@ -427,7 +427,7 @@ class TetrahedronTest extends GraphPattern {
   List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
 
-  TetrahedronTest(LX lx) {
+  public TetrahedronTest(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -486,7 +486,7 @@ class TetrahedronTest extends GraphPattern {
  ****************************************************************************/
 
 /*
-class TetrahedronTest extends LXPattern {
+public class TetrahedronTest extends LXPattern {
   private final BoundedParameter colorSpread
       = new BoundedParameter("CLR", 60.0, 0.0, 360.0);
   private final BoundedParameter cycleSpeed 
@@ -504,7 +504,7 @@ class TetrahedronTest extends LXPattern {
   private int pixelsPerChannel = 123;
   private int channelCount = 5;
 
-  TetrahedronTest(LX lx) {
+  public TetrahedronTest(LX lx) {
     super(lx);
     addParameter(colorSpread);
     addParameter(cycleSpeed);
@@ -531,7 +531,7 @@ class TetrahedronTest extends LXPattern {
  * Show the mapping for a single channel of a tetrahedron.
  ****************************************************************************/
 
-class MappingTetrahedron extends GraphPattern {
+public class MappingTetrahedron extends GraphPattern {
 
   float hueRange = 270.f;
   //float dHue     =  30.f;
@@ -541,7 +541,7 @@ class MappingTetrahedron extends GraphPattern {
 
   LXPoint point;
 
-  MappingTetrahedron(LX lx) {
+  public MappingTetrahedron(LX lx) {
     super(lx);
     //for (GraphModel g: model.tetraL.subGraphs) { tetrahedra.add(g); }
     //for (GraphModel g: model.tetraR.subGraphs) { tetrahedra.add(g); }
@@ -562,7 +562,7 @@ class MappingTetrahedron extends GraphPattern {
     GraphModel tetraL = model.getLayer(TL).getLayer(0);
     GraphModel tetraR = model.getLayer(TR).getLayer(0);
     Bar bar0 = tetraL.bars[0];
-    float dHue = hueRange / ((float)tetraL.bars.length) / ((float)bar0.points.size());
+    float dHue = hueRange / ((float)tetraL.bars.length) / ((float)bar0.points.length);
     float hue = 0.0;
     for (int b = 0; b < tetraL.bars.length; b++) {
       Bar bar = tetraL.bars[b];
@@ -590,7 +590,7 @@ class MappingTetrahedron extends GraphPattern {
  * Show the mapping for a single channel of a tetrahedron.
  ****************************************************************************/
 
-class MappingDodecahedron extends GraphPattern {
+public class MappingDodecahedron extends GraphPattern {
 
   float hueRange = 270.f;
   //float dHue     =  30.f;
@@ -600,7 +600,7 @@ class MappingDodecahedron extends GraphPattern {
 
   LXPoint point;
 
-  MappingDodecahedron(LX lx) {
+  public MappingDodecahedron(LX lx) {
     super(lx);
     //for (GraphModel g: model.tetraL.subGraphs) { tetrahedra.add(g); }
     //for (GraphModel g: model.tetraR.subGraphs) { tetrahedra.add(g); }
@@ -622,7 +622,7 @@ class MappingDodecahedron extends GraphPattern {
     //GraphModel tetraL = model.getLayer(TL).getLayer(0);
     //GraphModel tetraR = model.getLayer(TR).getLayer(0);
     Bar bar0 = dodeca.bars[0];
-    //float dHue = hueRange / ((float)dodeca.bars.length) / ((float)bar0.points.size());
+    //float dHue = hueRange / ((float)dodeca.bars.length) / ((float)bar0.points.length);
     //float dHue = hueRange / ((float)dodeca.bars.length);
     float dHue = 30.0;
     float hue = 0.0;
@@ -642,7 +642,7 @@ class MappingDodecahedron extends GraphPattern {
  *
  ****************************************************************************/
 
-class TestBarMatrix extends GraphPattern {
+public class TestBarMatrix extends GraphPattern {
   
   private final DiscreteParameter method = new DiscreteParameter("GEN", 1, 1, 5);
   private final BoundedParameter speed = new BoundedParameter("SPD",  5000, 0, 10000);
@@ -663,7 +663,7 @@ class TestBarMatrix extends GraphPattern {
 
   LXPoint point;
 
-  TestBarMatrix(LX lx) {
+  public TestBarMatrix(LX lx) {
     super(lx);
     addParameter(method);
     addParameter(speed);
@@ -693,7 +693,7 @@ class TestBarMatrix extends GraphPattern {
       int i, s;
       for (Bar _bar : model.bars) {
         Bar bar = _bar;
-        s = bar.points.size();
+        s = bar.points.length;
         i = LXUtils.constrain((int)((float)s * thisPos), 0, s-1);
         if (rev) { 
           bar = _bar.reversed();
@@ -702,7 +702,7 @@ class TestBarMatrix extends GraphPattern {
         }
         //System.out.format("Bar[%2d][%2d] R: %s   P: %8.2f   S: %3d   I: %3d\n",
         //  bar.node1.index, bar.node2.index, rev, thisPos, s, i);
-        colors[bar.points.get(i).index] = lx.hsb(hue,sat,brt);
+        colors[bar.points[i].index] = lx.hsb(hue,sat,brt);
       }
     
     // Chase up one bar and back down its reverse by looking it up in barMatrix
@@ -710,7 +710,7 @@ class TestBarMatrix extends GraphPattern {
       int i, s;
       for (Bar _bar : model.bars) {
         Bar bar = _bar;
-        s = bar.points.size();
+        s = bar.points.length;
         i = LXUtils.constrain((int)((float)s * thisPos), 0, s-1);
         if (rev) { 
           bar = model.getBar(bar.node2, bar.node1);
@@ -719,7 +719,7 @@ class TestBarMatrix extends GraphPattern {
         }
         //System.out.format("Bar[%2d][%2d] R: %s   P: %8.2f   S: %3d   I: %3d\n",
         //  bar.node1.index, bar.node2.index, rev, thisPos, s, i);
-        colors[bar.points.get(i).index] = lx.hsb(hue,sat,brt);
+        colors[bar.points[i].index] = lx.hsb(hue,sat,brt);
       }
      
     // Color by bar direction
@@ -762,7 +762,7 @@ class TestBarMatrix extends GraphPattern {
 
 
 
-class TetraSymmetryFace extends GraphPattern {
+public class TetraSymmetryFace extends GraphPattern {
 
   private final BoundedParameter cycleSpeed 
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
@@ -781,7 +781,7 @@ class TetraSymmetryFace extends GraphPattern {
   List<GraphModel> tetrahedra = new ArrayList<GraphModel>();
   LXPoint point;
 
-  TetraSymmetryFace(LX lx) {
+  public TetraSymmetryFace(LX lx) {
     super(lx);
     addParameter(cycleSpeed);
     addParameter(colorSpread);
@@ -827,8 +827,3 @@ class TetraSymmetryFace extends GraphPattern {
     }
   }
 }
-
-
-
-
-
