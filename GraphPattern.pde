@@ -49,12 +49,12 @@ public class SymmetryPattern extends GraphPattern {
 
 
   private final BoundedParameter runRate 
-    = new BoundedParameter("RUN",  5000, 0, 60000);
+    = new BoundedParameter("RUN",  1.0, 0.0, 5.0);
   private final BoundedParameter spinRate 
     = new BoundedParameter("SPIN",  100.0, 1.0, 10000.0);
   private final BoundedParameter fadeRate =
-    new BoundedParameter("FADE", 0.1, 0.0, 1.0);
-  private final SinLFO barPos = new SinLFO(0.0, 1.0, runRate);
+    new BoundedParameter("FADE", 0.5, 0.0, 1.0);
+  //private final SinLFO barPos = new SinLFO(0.0, 1.0, runRate);
   
   private final BoundedParameter colorSpread
     = new BoundedParameter("dHUE", 30.0, 0.0, 360.0);
@@ -81,6 +81,7 @@ public class SymmetryPattern extends GraphPattern {
   double lastSpin;
   double lastSwitch;
   double lastReset;
+  float barPos;
   int nodeI = 0;
   boolean toggle = false;
   float hue =   0.0;
@@ -106,13 +107,15 @@ public class SymmetryPattern extends GraphPattern {
     addParameter(runRate);
     addParameter(spinRate);
     addParameter(fadeRate);
-    addModulator(barPos).start();
+    //addModulator(barPos).start();
 
     addParameter(colorSpread);
     addParameter(colorSaturation);
     addParameter(colorSaturationRange);
     addParameter(colorBrightness);
     addParameter(colorBrightnessRange);
+
+    barPos = 0.0;
 
     for (GraphModel g: model.getLayer(TL).subGraphs) { 
       tetrahedra.add(g);
@@ -125,7 +128,7 @@ public class SymmetryPattern extends GraphPattern {
       TRBars.add(g.bars[0]);
     }
 
-    baseFace.bloom();
+    //baseFace.bloom();
 
   }
 
@@ -144,7 +147,6 @@ public class SymmetryPattern extends GraphPattern {
 
 
     float delayReset = 60000; 
-    float delaySwitch = 5000;
     // Reset symmetry
     if ((totalMs - lastReset) > delayReset) {
       sym.reset();
@@ -156,33 +158,27 @@ public class SymmetryPattern extends GraphPattern {
     //}
 
 
-
-
-
     // Spin the point around
-    /*
-    float spinMs = 10.0 / (float)Math.log(spinRate.getValuef());
+    float spinMs = 1.0 / (float)Math.log(spinRate.getValuef() / 1000.0);
     out("Spinning after %.2f Ms (%.2f)", spinMs, totalMs-lastSpin);
     if ((totalMs-lastSpin) > spinMs) {
       out("!! SPIN !!");
       baseFace.addStep();
       lastSpin = totalMs;
     }
-    */
 
     Bar bar = TLBars.get(0);
-    barPosI = (int)Math.floor(barPos.getValuef() * (float)bar.points.length);
-    barPosI = LXUtils.constrain(barPosI, 0, bar.points.length-1);
+    barPos += (float) (runRate.getValuef() * deltaMs / 1000.0);
+    barPosI = (int)Math.floor(barPos * (float)bar.points.size());
+    barPosI = LXUtils.constrain(barPosI, 0, bar.points.size()-1);
+    out("Run rate %.4f   Pos: %.4f   I: %d", runRate.getValuef(), barPos, barPosI);
     for (int i = lastBarPosI; i <= barPosI; i++) {
       LXPoint point = bar.points[i];
       int c = lx.hsb(hue,sat,brt);
       sym.template[point.index] = c;
     }
     lastBarPosI = barPosI;
-    if (barPosI == 0) {
-      switchBar();
-    }
-    if (barPosI >= (bar.points.length - 1)) {
+    if (barPos >= 1.0) {
       switchBar();
     }
 
@@ -200,6 +196,7 @@ public class SymmetryPattern extends GraphPattern {
     symBarE = sym.rotateBar(symBar);
     lastSwitch = totalMs;
     sym.push(baseFace);
+    barPos = 0.0;
   }
 
 }
@@ -827,3 +824,143 @@ public class TetraSymmetryFace extends GraphPattern {
     }
   }
 }
+
+
+
+
+/** ************************************************************ PIXIE PATTERN
+ * Points of light that chase along the edges.
+ *
+ * More ideas for later:
+ * - Scatter/gather (they swarm around one point, then fly by
+ *   divergent paths to another point)
+ * - Fireworks (explosion of them coming out of one point)
+ * - Multiple colors (maybe just a few in a different color)
+ *
+ * @author Geoff Schmiddt
+ ************************************************************************* **/
+
+class PixiePattern extends GraphPattern {
+  // How many pixies are zipping around.
+  private final BoundedParameter numPixies =
+      new BoundedParameter("NUM", 100, 0, 1000);
+  // How fast each pixie moves, in pixels per second.
+  private final BoundedParameter speed =
+      new BoundedParameter("SPD", 60.0, 10.0, 1000.0);
+  // How long the trails persist. (Decay factor for the trails, each frame.)
+  // XXX really should be scaled by frame time
+  private final BoundedParameter fade =
+      new BoundedParameter("FADE", 0.9, 0.8, .99);
+  // Brightness adjustment factor.
+  private final BoundedParameter brightness =
+      new BoundedParameter("BRIGHT", 1.0, .25, 2.0);
+  private final BoundedParameter colorHue = new BoundedParameter("HUE", 210, 0, 359.0);
+  private final BoundedParameter colorSat = new BoundedParameter("SAT", 63.0, 0.0, 100.0);
+
+
+  class Pixie {
+    public Node fromNode, toNode;
+    public double offset;
+    public int kolor;
+
+    public Pixie() {
+    }
+  }
+  private ArrayList<Pixie> pixies = new ArrayList<Pixie>();
+
+  public PixiePattern(LX lx) {
+    super(lx);
+    addParameter(numPixies);
+    addParameter(fade);
+    addParameter(speed);
+    addParameter(brightness);
+    addParameter(colorHue);
+    addParameter(colorSat);
+
+  }
+
+  public void setPixieCount(int count) {
+    //make sure all pixies are set to current color
+    for (Pixie p : this.pixies) {
+      p.kolor = lx.hsb(colorHue.getValuef(), colorSat.getValuef(), 100);
+    }
+      
+    while (this.pixies.size() < count) {
+      Pixie p = new Pixie();
+      p.fromNode = model.getRandomNode();
+      p.toNode = p.fromNode.getRandomAdjacentNode();
+      p.kolor = lx.hsb(colorHue.getValuef(), colorSat.getValuef(), 100);
+      this.pixies.add(p);
+    }
+    if (this.pixies.size() > count) {
+      this.pixies.subList(count, this.pixies.size()).clear();
+    }
+  } 
+
+  public void run(double deltaMs) {
+    this.setPixieCount(Math.round(numPixies.getValuef()));
+    //    System.out.format("FRAME %.2f\n", deltaMs);
+    float fadeRate = 0;
+    float speedRate = 0;
+    if (museActivated) {
+      fadeRate = map(muse.getMellow(), 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
+      speedRate = map(muse.getConcentration(), 0.0, 1.0, (float)20.0, 300);
+    }
+    else {
+      fadeRate = fade.getValuef();
+      speedRate = speed.getValuef();
+    }
+
+    for (LXPoint p : model.points) {
+     colors[p.index] =
+         LXColor.scaleBrightness(colors[p.index], fadeRate);
+    }
+
+    for (Pixie p : this.pixies) {
+      double drawOffset = p.offset;
+      p.offset += (deltaMs / 1000.0) * speedRate;
+      //      System.out.format("from %.2f to %.2f\n", drawOffset, p.offset);
+
+      while (drawOffset < p.offset) {
+          //        System.out.format("at %.2f, going to %.2f\n", drawOffset, p.offset);
+        List<LXPoint> points = nodeToNodePoints(p.fromNode, p.toNode);
+
+        int index = (int)Math.floor(drawOffset);
+        if (index >= points.size()) {
+          Node oldFromNode = p.fromNode;
+          p.fromNode = p.toNode;
+          do {
+            p.toNode = p.fromNode.random_adjacent_node();
+          } while (angleBetweenThreeNodes(oldFromNode, p.fromNode, p.toNode)
+                   < 4*PI/360*3); // don't go back the way we came
+          drawOffset -= points.size();
+          p.offset -= points.size();
+          //          System.out.format("next edge\n");
+          continue;
+        }
+
+        // How long, notionally, was the pixie at this pixel during
+        // this frame? If we are moving at 100 pixels per second, say,
+        // then timeHereMs will add up to 1/100th of a second for each
+        // pixel in the pixie's path, possibly accumulated over
+        // multiple frames.
+        double end = Math.min(p.offset, Math.ceil(drawOffset + .000000001));
+        double timeHereMs = (end - drawOffset) /
+            speedRate * 1000.0;
+
+        LXPoint here = points.get((int)Math.floor(drawOffset));
+        //        System.out.format("%.2fms at offset %d\n", timeHereMs, (int)Math.floor(drawOffset));
+
+        addColor(here.index,
+                 LXColor.scaleBrightness(p.kolor,
+                                         (float)timeHereMs / 1000.0
+                                         * speedRate
+                                         * brightness.getValuef()));
+        drawOffset = end;
+      }
+    }
+  }
+}
+
+
+
