@@ -169,8 +169,8 @@ public class SymmetryPattern extends GraphPattern {
 
     Bar bar = TLBars.get(0);
     barPos += (float) (runRate.getValuef() * deltaMs / 1000.0);
-    barPosI = (int)Math.floor(barPos * (float)bar.points.size());
-    barPosI = LXUtils.constrain(barPosI, 0, bar.points.size()-1);
+    barPosI = (int)Math.floor(barPos * (float)bar.points.length);
+    barPosI = LXUtils.constrain(barPosI, 0, bar.points.length-1);
     out("Run rate %.4f   Pos: %.4f   I: %d", runRate.getValuef(), barPos, barPosI);
     for (int i = lastBarPosI; i <= barPosI; i++) {
       LXPoint point = bar.points[i];
@@ -840,7 +840,7 @@ public class TetraSymmetryFace extends GraphPattern {
  * @author Geoff Schmiddt
  ************************************************************************* **/
 
-class PixiePattern extends GraphPattern {
+public class PixiePattern extends GraphPattern {
   // How many pixies are zipping around.
   private final BoundedParameter numPixies =
       new BoundedParameter("NUM", 100, 0, 1000);
@@ -888,7 +888,8 @@ class PixiePattern extends GraphPattern {
     while (this.pixies.size() < count) {
       Pixie p = new Pixie();
       p.fromNode = model.getRandomNode();
-      p.toNode = p.fromNode.getRandomAdjacentNode();
+      //p.toNode = p.fromNode.getRandomAdjacentNode();
+      p.toNode = model.getRandomNode(p.fromNode);
       p.kolor = lx.hsb(colorHue.getValuef(), colorSat.getValuef(), 100);
       this.pixies.add(p);
     }
@@ -902,14 +903,15 @@ class PixiePattern extends GraphPattern {
     //    System.out.format("FRAME %.2f\n", deltaMs);
     float fadeRate = 0;
     float speedRate = 0;
+    /*
     if (museActivated) {
       fadeRate = map(muse.getMellow(), 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
       speedRate = map(muse.getConcentration(), 0.0, 1.0, (float)20.0, 300);
     }
     else {
+    */
       fadeRate = fade.getValuef();
       speedRate = speed.getValuef();
-    }
 
     for (LXPoint p : model.points) {
      colors[p.index] =
@@ -923,18 +925,20 @@ class PixiePattern extends GraphPattern {
 
       while (drawOffset < p.offset) {
           //        System.out.format("at %.2f, going to %.2f\n", drawOffset, p.offset);
-        List<LXPoint> points = nodeToNodePoints(p.fromNode, p.toNode);
+        //List<LXPoint> points = nodeToNodePoints(p.fromNode, p.toNode);
+        Bar bar = model.getBar(p.fromNode,p.toNode);
+        LXPoint[] points = bar.points;
 
         int index = (int)Math.floor(drawOffset);
-        if (index >= points.size()) {
+        if (index >= points.length) {
           Node oldFromNode = p.fromNode;
           p.fromNode = p.toNode;
           do {
-            p.toNode = p.fromNode.random_adjacent_node();
-          } while (angleBetweenThreeNodes(oldFromNode, p.fromNode, p.toNode)
+            p.toNode = model.getRandomNode(p.fromNode);
+          } while (model.getNodeAngle(oldFromNode, p.fromNode, p.toNode)
                    < 4*PI/360*3); // don't go back the way we came
-          drawOffset -= points.size();
-          p.offset -= points.size();
+          drawOffset -= points.length;
+          p.offset -= points.length;
           //          System.out.format("next edge\n");
           continue;
         }
@@ -948,7 +952,7 @@ class PixiePattern extends GraphPattern {
         double timeHereMs = (end - drawOffset) /
             speedRate * 1000.0;
 
-        LXPoint here = points.get((int)Math.floor(drawOffset));
+        LXPoint here = points[(int)Math.floor(drawOffset)];
         //        System.out.format("%.2fms at offset %d\n", timeHereMs, (int)Math.floor(drawOffset));
 
         addColor(here.index,

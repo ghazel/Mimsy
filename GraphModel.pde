@@ -165,17 +165,56 @@ public static class GraphModel extends LXModel {
 
 
 
-  //********************************************************************* BARS
+  //******************************************************************** NODES
 
+  
+  /*
   public Node getRandomNode() {
     Random randomized = new Random();
     return nodes[randomized.nextInt(nodes.length)];
   }
+  */
 
+  public Node getRandomNode(Object... args) {
+    Random randomized = new Random();
+    List<Node> nodes = Arrays.asList(this.nodes);
+    for (Object arg : args) { 
+      List<Node> newNodes = new ArrayList<Node>();
+      if (arg instanceof Node) {
+        for (Node node : nodes) { 
+          if (barMatrix[((Node)arg).index][node.index] != null) {
+            newNodes.add(node);
+          }
+        }
+      }
+      nodes = newNodes;
+    }
+    return nodes.get(randomized.nextInt(nodes.size()));
+  }
+
+
+  //********************************************************************* BARS
 
   public Bar getRandomBar() {
     Random randomized = new Random();
     return bars[randomized.nextInt(bars.length)];
+  }
+
+  public Bar getRandomBar(Object... args) {
+    Random randomized = new Random();
+    List<Bar> bars = Arrays.asList(this.bars);
+    for (Object arg : args) { 
+      List<Bar> newBars = new ArrayList<Bar>();
+      if (arg instanceof Node) {
+        for (Bar bar : bars) { 
+          if (bar.node1 == arg | bar.node2 == arg) {
+            newBars.add(bar);
+          }
+        }
+      }
+      bars = newBars;
+    }
+    return bars.get(randomized.nextInt(bars.size()));
   }
 
 
@@ -213,6 +252,15 @@ public static class GraphModel extends LXModel {
 
   public Bar getBar(int node1, int node2) {
     return this.barMatrix[node1][node2];
+  }
+
+
+  //************************************************************** VECTOR MATH
+
+  public static float getNodeAngle(Node n1, Node n2, Node n3) {
+    PVector v1 = PVector.sub(n2, n1);
+    PVector v2 = PVector.sub(n3, n2);
+    return PVector.angleBetween(v1, v2);
   }
 
 
