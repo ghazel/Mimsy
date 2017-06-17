@@ -39,8 +39,8 @@ static int TETRAHEDRON_BAR_THICKNESS =  5;
 
 
 //---------------- Which Components to Draw
-static boolean DRAW_DODECAHEDRON = true;
-static boolean DRAW_TETRA_LEFT   = true;
+static boolean DRAW_DODECAHEDRON = false;
+static boolean DRAW_TETRA_LEFT   = false;
 static boolean DRAW_TETRA_RIGHT  = true;
 static boolean DRAW_FRABJOUS     = false; // not implemented
 static boolean DRAW_CUBIC        = false; // not implemented

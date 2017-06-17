@@ -119,11 +119,10 @@ void setup() {
 
   startMillis = System.currentTimeMillis();
   lastMillis = startMillis;
-  smooth(4);
   
   //==================================================================== Model 
   model = buildMimsyModel();
-  System.out.format("Model Name: %s\n", model.layer);
+  out("Model Name: %s\n", model.layer);
   out("Finished Building Model");
   
   
@@ -137,18 +136,22 @@ void setup() {
         lx.registerEffect(BlurEffect.class);
         lx.registerEffect(DesaturationEffect.class);
         // TODO: the UDP output instantiation will go in here!
+        smooth(4);
         out("Initialized LXStudio");
       }
       
       public void onUIReady(LXStudio lx, LXStudio.UI ui) {
-        ui.preview.setRadius(80*FEET).setPhi(-PI/18).setTheta(PI/12);
-        ui.preview.setCenter(0, model.cy - 2*FEET, 0);
+        //ui.preview.setRadius(80*FEET).setPhi(-PI/18).setTheta(PI/12);
+        //ui.preview.setCenter(0, model.cy - 2*FEET, 0);
         //ui.preview.addComponent(new UISimulation());       
-        ui.preview.pointCloud.setVisible(false); //TODO doesnt work
+        ui.preview.pointCloud.setPointSize(5.0)
+          .disablePointSizeAttenuation(); 
+        //ui.preview.pointCloud.setVisible(false); //TODO doesnt work
+        smooth(4);
        
         
         // Narrow angle lens, for a fuller visualization
-        ui.preview.perspective.setValue(30);
+        //ui.preview.perspective.setValue(30);
 
        // uiTreeControls = (UITreeControls) new UITreeControls(ui).addToContainer(ui.leftPane.global);
         out("Initialized LX UI");
@@ -168,7 +171,7 @@ void setup() {
   
   //===================================================================== P3LX
 
-  lx = new LXStudio(this, model, false);
+  //lx = new LXStudio(this, model, false);
   //anything that extends LXPattern gets loaded automatically now (using reflection)
   
   //lx.setPatterns(patterns(lx));
@@ -289,6 +292,8 @@ void setup() {
     buildOutputs();
     out("Built output clients");
   }
+  
+  
 
 }
 
