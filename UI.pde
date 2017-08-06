@@ -1,5 +1,117 @@
 
 
+/**
+ * Create cylindrical bar segments for a nicer simulation
+ */
+
+class UIBars extends UI3dComponent {
+
+  GraphModel model;
+
+  public UIBars(GraphModel model) {
+    super();
+    this.model = model;
+  }
+
+  @Override
+  protected void onDraw(UI ui, PGraphics pg) {
+    int[] colors = lx.getColors();
+    pg.noStroke();
+    //pg.noFill();
+    //pg.textureMode(NORMAL);
+
+    for (Bar bar : model.bars) {
+
+      pg.pushMatrix();
+      pg.translate(bar.node1.x, bar.node1.y, bar.node1.z);
+      //pg.translate(bar.cx, bar.cy, bar.cz);
+      pg.rotateZ(bar.theta);
+      pg.rotateY(-bar.azimuth);
+      //drawCylinder(pg, bar.length, 1.0, LXColor.WHITE);
+      
+      for (LXPoint point : bar.points) {
+        drawCylinder(pg, bar.spacing, BAR_RADIUS, colors[point.index]);
+        pg.translate(bar.spacing, 0.0, 0.0);
+      }
+      pg.popMatrix();
+      //System.exit(0);
+    }
+  }
+
+  private void drawCylinder(PGraphics pg, float length, float radius, int bar_color) {
+    pg.beginShape(TRIANGLE_STRIP);
+    pg.fill(bar_color);
+    for (int i = 0; i <= BAR_DETAIL; i++) {
+      int ii = i % BAR_DETAIL;
+      float a = i * TWO_PI / BAR_DETAIL;
+      float y = radius * cos(a);
+      float z = radius * sin(a);
+      //pg.vertex(-length/2.0, y, z);
+      //pg.vertex( length/2.0, y, z);
+      pg.vertex( 0, y, z);
+      pg.vertex( length, y, z);
+    }
+    pg.endShape(CLOSE);
+  }
+
+}
+
+
+class UIMimsyControls extends UICollapsibleSection {
+
+  public final UIButton pointsVisible;
+  public final UIButton ddVisible;
+  public final UIButton tlVisible;
+  public final UIButton trVisible;
+  //public final UIButton nodesVisible;
+
+  public UIMimsyControls(final LXStudio.UI ui) {
+    super(ui, 0, 0, ui.leftPane.global.getContentWidth(), 200);
+    setTitle("RENDER");
+    setLayout(UI2dContainer.Layout.VERTICAL);
+    setChildMargin(2);
+    
+    this.pointsVisible = (UIButton) new UIButton(0, 0, getContentWidth(), 18) {
+      public void onToggle(boolean on) {
+        ui.preview.pointCloud.setVisible(on);
+      }
+    }
+    .setLabel("Points")
+    .setActive(ui.preview.pointCloud.isVisible())
+    .addToContainer(this);
+    
+    this.ddVisible = (UIButton) new UIButton(0, 0, getContentWidth() / 3 - 4, 18) {
+      public void onToggle(boolean on) {
+        uiBarsDD.setVisible(on);
+      }
+    }
+    .setLabel("DD")
+    .setActive(uiBarsDD.isVisible())
+    .addToContainer(this);
+     
+    this.tlVisible = (UIButton) new UIButton(0, 0, getContentWidth() / 3 - 4, 18) {
+      public void onToggle(boolean on) {
+        uiBarsTL.setVisible(on);
+      }
+    }
+    .setLabel("TL")
+    .setActive(uiBarsTL.isVisible())
+    .addToContainer(this);
+
+    this.trVisible = (UIButton) new UIButton(0, 0, getContentWidth() / 3 - 4, 18) {
+      public void onToggle(boolean on) {
+        uiBarsTR.setVisible(on);
+      }
+    }
+    .setLabel("TR")
+    .setActive(uiBarsTR.isVisible())
+    .addToContainer(this);
+    
+  }
+}
+
+
+
 class UINodes extends UI3dComponent {
 
   private final float NODE_RADIUS = 10.0;
@@ -126,46 +238,7 @@ class UISimulationControl extends UIWindow {
   }
 }
 
-class UIEngineControl extends UIWindow {
-  
-  final UIKnob fpsKnob;
-  
-  UIEngineControl(UI ui, float x, float y) {
-    super(ui, "ENGINE", x, y, UIChannelControl.WIDTH, 124);
-        
-    y = UIWindow.TITLE_LABEL_HEIGHT;
-    new UIButton(4, y, width-8, 20) {
-      protected void onToggle(boolean enabled) {
-        lx.engine.setThreaded(enabled);
-        fpsKnob.setEnabled(enabled);
-      }
-    }
-    .setActiveLabel("Multi-Threaded")
-    .setInactiveLabel("Single-Threaded")
-    .addToContainer(this);
-   
-    /* 
-    y += 24;
-    new UIButton(4, y, width-8, 20) {
-      protected void onToggle(boolean enabled) {
-        if (enabled) { ortho(); }
-        else { perspective(); }
-      }
-    }
-    .setActiveLabel("Orthoscopic")
-    .setInactiveLabel("Perspective")
-    .addToContainer(this);
-    */
-    
-    y += 24;
-    fpsKnob = new UIKnob(4, y);    
-    fpsKnob
-    .setParameter(lx.engine.framesPerSecond)
-    .setEnabled(lx.engine.isThreaded())
-    .addToContainer(this);
-    
-  }
-}
+
 
 class UIComponentsDemo extends UIWindow {
   

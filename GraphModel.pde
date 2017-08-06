@@ -336,6 +336,15 @@ public static class Bar extends LXModel {
   public Bar reverse;
   public List<Bar> children;
 
+  // Bar Geometry
+  public float length;
+  public float spacing;
+  public PVector heading;
+  public PVector norm;
+  public float theta;
+  public float azimuth;
+  public float elevation;
+
   /** 
    * Full Constructor 
    */
@@ -347,6 +356,7 @@ public static class Bar extends LXModel {
     this.tags       = new ArrayList<String>();
     this.isReversed = false;
     this.children   = new ArrayList<Bar>();
+    this.calculateGeometry();
   }
 
   /**
@@ -357,7 +367,7 @@ public static class Bar extends LXModel {
   }
 
   /**
-   * Copy a bar in reverse
+   * Copy Constructor with Reversal
    */
   public Bar(Bar parent, boolean reversed) {
     super(new Fixture(parent.points, reversed));
@@ -375,6 +385,7 @@ public static class Bar extends LXModel {
       this.node1 = parent.node1;
       this.node2 = parent.node2;
     }
+    this.calculateGeometry();
   }
 
   /**
@@ -387,6 +398,46 @@ public static class Bar extends LXModel {
     return new Bar(this, true);
   }
 
+
+  /**
+   * Calculate relevant geometry for the bar
+   */
+  private void calculateGeometry() {
+    heading = PVector.sub(node2, node1);
+    norm = heading.copy().normalize();
+    length = heading.mag();
+    spacing = length / (float)points.length;
+    
+    float rxz = (float) Math.sqrt(norm.x * norm.x + norm.z * norm.z);
+    //theta = (float) Math.atan2(norm.y, norm.x);
+    //azimuth = (float) Math.atan2(norm.z, norm.x);
+    //elevation = (float) Math.atan2(norm.y, rxz);
+    theta = (float) ((LX.TWO_PI + Math.atan2(norm.y, norm.x)) % (LX.TWO_PI));
+    elevation = (float) ((LX.TWO_PI + Math.atan2(norm.y, rxz)) % (LX.TWO_PI));
+
+    if (norm.x == 0.0) {
+      azimuth = 0.0;
+    } else {
+      //azimuth = (float) ((LX.TWO_PI + Math.atan2(norm.z, norm.x)) % (LX.TWO_PI));
+      azimuth = (float) Math.asin(norm.z);
+    }
+ }
+
+
+  public void printDetails() {
+    out("Building Bar %-10s [#%d] "
+      + "N1 <%5.0f %5.0f %5.0f> "
+      + "N2 <%5.0f %5.0f %5.0f> "
+      + "HH <%5.0f %5.0f %5.0f> "
+      + "L %5.0f S %5.2f  T %5.0f  Z %5.0f  E %5.0f",
+      name, points.length, 
+      node1.x, node1.y, node1.z,
+      node2.x, node2.y, node2.z,
+      heading.x, heading.y, heading.z,
+      length, spacing,
+      degrees(theta),  degrees(azimuth), degrees(elevation));
+  }
+ 
   /**
    * Get indexes for first and last points in the bar.
    */

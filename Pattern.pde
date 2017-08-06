@@ -164,8 +164,8 @@ public class Psychedelic extends LXPattern {
       }
 
     ms += deltaMs;
-    offset += deltaMs*cycleSpeed.getValue()/1000.;
-    int steps = (int)colorSpread.getValue();
+    offset += deltaMs*cycleSpeed.getValuef()/1000.;
+    int steps = (int)colorSpread.getValuef();
     if (steps != gp.steps) { 
       gp.setSteps(steps);
     }

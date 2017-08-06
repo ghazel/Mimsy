@@ -536,8 +536,6 @@ public class MappingTetrahedron extends GraphPattern {
   float baseSat  = 80.f;
   float baseBrt  = 90.f;
 
-  LXPoint point;
-
   public MappingTetrahedron(LX lx) {
     super(lx);
     //for (GraphModel g: model.tetraL.subGraphs) { tetrahedra.add(g); }

@@ -16,9 +16,9 @@ import heronarts.lx.LX;
 import java.util.*;
 
 private final String ControllerIPs[] = {
-  "192.168.1.85",
+  //"192.168.1.85",
   //"192.168.1.81",
-  //"192.168.1.87",
+  "192.168.1.87",
   // "192.168.1.86",
 };
 
@@ -54,9 +54,9 @@ void buildOutputs() {
     //for (int i = 1; i < ControllerIPs.length; i++) {
     //    lx.addOutput(new CortexOutput(lx ,ControllerIPs[i-1], i, concatenateChannels(i)));
     //}
-    lx.addOutput(new CortexOutput(lx ,"192.168.1.85", 1, concatenateChannels(1)));
+    //lx.addOutput(new CortexOutput(lx ,"192.168.1.85", 1, concatenateChannels(1)));
     //lx.addOutput(new CortexOutput(lx ,"192.168.1.81", 2, concatenateChannels(2)));
-    //lx.addOutput(new CortexOutput(lx, "192.168.1.87", 3, concatenateChannels(3)));
+    lx.addOutput(new CortexOutput(lx, "192.168.1.87", 1, concatenateChannels(1)));
     //lx.addOutput(new CortexOutput(lx ,"192.168.1.86", 3, concatenateChannels(3)));
 }
 

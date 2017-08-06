@@ -18,12 +18,20 @@ import ddf.minim.*;
 //*************************************************************** P3LX OBJECTS
 // Top-level, we have a model and a P3LX instance
 static GraphModel model;
+static MimsyMap mimsyMap;
 P3LX lx;
 
 LXPattern[]       patterns;
 //LXTransition[]    transitions;
 //Effects           effects;
 LXEffect[]        effectsArr;
+
+
+UIBars uiBarsDD;
+UIBars uiBarsTL;
+UIBars uiBarsTR;
+
+UIMimsyControls uiMimsyControls;
 
 UI3dContext uiContext;
 UI3dComponent pointCloudDodecahedron;
@@ -33,77 +41,14 @@ UI3dComponent uiWalls;
 UI3dComponent uiNodes;
 
 public BooleanParameter uiOrthoCamera = new BooleanParameter("Ortho");
-
 public BoundedParameter clipNear = new BoundedParameter("Clip Near", 0, 0, 100);
 public BoundedParameter clipFar = new BoundedParameter("Clip Far", 100, 0, 100);
-
 
 
 // Let's NOT work in inches, but will leave these here for porting 
 // patterns that do.
 final static float INCHES = 25.4;
 final static float FEET = 12.0*INCHES;
-
-
-
-
-
-// Video Mixing Channels
-static final int LEFT_CHANNEL = 0;
-static final int RIGHT_CHANNEL = 1;
-LXChannel L;
-LXChannel R;
-
-//************************************* Engine Construction and Initialization
-
-//LXTransition _transition(P3LX lx) {
-//  return new DissolveTransition(lx).setDuration(1000);
-//}
-
-/*
-LXPattern[] _leftPatterns(P3LX lx) {
-  LXPattern[] patterns = patterns(lx);
-  for (LXPattern p : patterns) {
-    p.setTransition(_transition(lx));
-   }
-  return patterns;
-}
-
-LXPattern[] _rightPatterns(P3LX lx) {
-  LXPattern[] patterns = _leftPatterns(lx);
-  LXPattern[] rightPatterns = new LXPattern[patterns.length+1];
-  int i = 0;
-  rightPatterns[i++] = new BlankPattern(lx).setTransition(_transition(lx));
-  for (LXPattern p : patterns) {
-    rightPatterns[i++] = p;
-  }
-  return rightPatterns;
-}
-*/
-
-/*
-LXEffect[] _effectsArray(Effects effects) {
-  List<LXEffect> effectList = new ArrayList<LXEffect>();
-  for (Field f : effects.getClass().getDeclaredFields()) {
-    try {
-      Object val = f.get(effects);
-      if (val instanceof LXEffect) {
-        effectList.add((LXEffect)val);
-      }
-    } catch (IllegalAccessException iax) {}
-  }
-
-  return effectList.toArray(new LXEffect[]{});
-}
-
-LXEffect getSelectedEffect() {
-  return effectsArr[selectedEffect.getValuei()];
-}
-*/
-
-
-
-
 
 /** *************************************************************** MAIN SETUP
  * Set up models etc for whole package (Processing thing)
@@ -113,6 +58,7 @@ LXEffect getSelectedEffect() {
 
 public void settings() {
   size(1200, 900, "processing.opengl.PGraphics3D");
+  smooth(4);
 }
 
 void setup() {
@@ -121,14 +67,12 @@ void setup() {
   lastMillis = startMillis;
   
   //==================================================================== Model 
-  model = buildMimsyModel();
+  mimsyMap = new MimsyMap(MIMSY_TYPE);
+  model = mimsyMap.buildModel();
   out("Model Name: %s\n", model.layer);
   out("Finished Building Model");
   
   
-  
-  
-  //from tenere
    try {
     lx = new LXStudio(this, model, false) {
       public void initialize(LXStudio lx, LXStudio.UI ui) {
@@ -136,7 +80,6 @@ void setup() {
         lx.registerEffect(BlurEffect.class);
         lx.registerEffect(DesaturationEffect.class);
         // TODO: the UDP output instantiation will go in here!
-        smooth(4);
         out("Initialized LXStudio");
       }
       
@@ -144,11 +87,13 @@ void setup() {
         //ui.preview.setRadius(80*FEET).setPhi(-PI/18).setTheta(PI/12);
         //ui.preview.setCenter(0, model.cy - 2*FEET, 0);
         //ui.preview.addComponent(new UISimulation());       
-        ui.preview.pointCloud.setPointSize(5.0)
-          .disablePointSizeAttenuation(); 
+        ui.preview.pointCloud.setPointSize(2.0).setVisible(true);
+        ui.preview.addComponent(uiBarsDD = new UIBars(((GraphModel)model).getLayer(DD)));
+        ui.preview.addComponent(uiBarsTL = new UIBars(((GraphModel)model).getLayer(TL)));
+        ui.preview.addComponent(uiBarsTR = new UIBars(((GraphModel)model).getLayer(TR)));
         //ui.preview.pointCloud.setVisible(false); //TODO doesnt work
-        smooth(4);
-       
+        uiMimsyControls = (UIMimsyControls) new UIMimsyControls(ui)
+                                              .addToContainer(ui.leftPane.global);     
         
         // Narrow angle lens, for a fuller visualization
         //ui.preview.perspective.setValue(30);
@@ -288,7 +233,7 @@ void setup() {
   //==================================================== Output to Controllers
   // create outputs via CortexOutput
   if (OUTPUT) {
-    buildChannelMap(model);
+    mimsyMap.buildChannelMap(model);
     buildOutputs();
     out("Built output clients");
   }
