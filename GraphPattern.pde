@@ -619,15 +619,15 @@ public class MappingDodecahedron extends GraphPattern {
     Bar bar0 = dodeca.bars[0];
     //float dHue = hueRange / ((float)dodeca.bars.length) / ((float)bar0.points.length);
     //float dHue = hueRange / ((float)dodeca.bars.length);
-    float dHue = 30.0;
+    float dHue = 1.0;
     float hue = 0.0;
     for (int b = 0; b < dodeca.bars.length; b++) {
       if (b >= 6) { continue; }
       Bar bar = dodeca.bars[b];
       for (LXPoint p: bar.points) {
         colors[p.index] = lx.hsb(hue,baseSat,baseBrt);
+        hue += dHue;
       }
-      hue += dHue;
     }
   }
 }

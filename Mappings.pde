@@ -43,12 +43,6 @@ static class MimsyMap {
   ArrayList<int[]> pixelMap = new ArrayList<int[]>();
 
 
-  /*
-  public MimsyMap() {
-    this(MimsyType);
-  }
-  */
-
   public MimsyMap(String type) {
     MimsyType = type;
     if (type == "MiniMim") {
@@ -164,7 +158,7 @@ static class MimsyMap {
 
 
     int[][] TETRAHEDRON_BAR_ORDER = 
-      new int[][] {{0,1},{1,3},{2,3},{3,1},{2,3},{0,3}};
+      new int[][] {{0,1},{1,2},{2,3},{3,1},{2,0},{0,3}};
 
 
     Node[] nodes = new Node[dd.NODES];
