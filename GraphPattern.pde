@@ -844,7 +844,7 @@ public class PixiePattern extends GraphPattern {
       new BoundedParameter("NUM", 100, 0, 1000);
   // How fast each pixie moves, in pixels per second.
   private final BoundedParameter speed =
-      new BoundedParameter("SPD", 60.0, 10.0, 1000.0);
+      new BoundedParameter("SPD", 60.0, 10.0, 200.0);
   // How long the trails persist. (Decay factor for the trails, each frame.)
   // XXX really should be scaled by frame time
   private final BoundedParameter fade =

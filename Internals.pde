@@ -40,6 +40,16 @@ UI3dComponent pointCloudTetraRight;
 UI3dComponent uiWalls;
 UI3dComponent uiNodes;
 
+// define Muse globals
+UIMuseControl uiMuseControl;
+UIMuseHUD uiMuseHUD;
+MuseConnect muse;
+MuseHUD museHUD;
+int MUSE_OSCPORT = 5000;
+boolean museActivated = false;
+
+
+
 public BooleanParameter uiOrthoCamera = new BooleanParameter("Ortho");
 public BoundedParameter clipNear = new BoundedParameter("Clip Near", 0, 0, 100);
 public BoundedParameter clipFar = new BoundedParameter("Clip Far", 100, 0, 100);
@@ -65,14 +75,23 @@ void setup() {
 
   startMillis = System.currentTimeMillis();
   lastMillis = startMillis;
-  
+
   //==================================================================== Model 
   mimsyMap = new MimsyMap(MIMSY_TYPE);
   model = mimsyMap.buildModel();
   out("Model Name: %s\n", model.layer);
   out("Finished Building Model");
-  
-  
+
+  //==================================================== Initialize sensors
+  //initialize the Muse connection
+  // TODO: this should gracefully handle lack of Muse OSC input
+  muse = new MuseConnect(this, MUSE_OSCPORT);
+  println(muse);
+  museHUD = new MuseHUD(muse);
+  println(museHUD);
+  out("added Muse OSC parser and HUD");
+
+
    try {
     lx = new LXStudio(this, model, false) {
       public void initialize(LXStudio lx, LXStudio.UI ui) {
@@ -82,11 +101,11 @@ void setup() {
         // TODO: the UDP output instantiation will go in here!
         out("Initialized LXStudio");
       }
-      
+
       public void onUIReady(LXStudio lx, LXStudio.UI ui) {
         //ui.preview.setRadius(80*FEET).setPhi(-PI/18).setTheta(PI/12);
         //ui.preview.setCenter(0, model.cy - 2*FEET, 0);
-        //ui.preview.addComponent(new UISimulation());       
+        //ui.preview.addComponent(new UISimulation());
         ui.preview.pointCloud.setPointSize(2.0).setVisible(true);
         ui.preview.addComponent(uiBarsDD = new UIBars(((GraphModel)model).getLayer(DD)));
         ui.preview.addComponent(uiBarsTL = new UIBars(((GraphModel)model).getLayer(TL)));
@@ -94,7 +113,14 @@ void setup() {
         //ui.preview.pointCloud.setVisible(false); //TODO doesnt work
         uiMimsyControls = (UIMimsyControls) new UIMimsyControls(ui)
                                               .addToContainer(ui.leftPane.global);     
-        
+
+
+        // add Muse UI components
+        // uiMuseControl = (UIMuseControl) new UIMuseControl(ui, muse, 0, 0)
+        //                             .addToContainer(ui.leftPane.global);
+        // uiMuseHUD = (UIMuseHUD) new UIMuseHUD(ui, museHUD, width-150, height-300)
+        //                             .addToContainer(ui.leftPane.global);
+
         // Narrow angle lens, for a fuller visualization
         //ui.preview.perspective.setValue(30);
 
@@ -106,24 +132,24 @@ void setup() {
     x.printStackTrace();
   }
   //end from tenere
-  
+
 
   if (TEST_SYMMETRY) {
     symTest = new SymmetryTest(model);
     symTest.runSymmetryTests();
     exit();
   }
-  
+
   //===================================================================== P3LX
 
   //lx = new LXStudio(this, model, false);
   //anything that extends LXPattern gets loaded automatically now (using reflection)
-  
+
   //lx.setPatterns(patterns(lx));
   //out("Finished Loading Patterns");
-  
+
   //================================================================= 3D Model
-  
+
 
 
   ////-------------- Prepare 3D Reference Elements

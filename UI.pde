@@ -347,3 +347,58 @@ public class UICameraControlMimsy extends UIWindow {
   }
 
 }
+
+/** ********************************************************** 
+ * UIMuseControl
+ ************************************************************************** */
+class UIMuseControl extends UIWindow {
+  // requires the MuseConnect and MuseHUD objects to be created on the global space
+  private MuseConnect muse;
+  private final static int WIDTH = 140;
+  private final static int HEIGHT = 50;
+
+  public UIMuseControl(UI ui, MuseConnect muse, float x, float y) {
+    super(lx.ui, "MUSE CONTROL", x, y, WIDTH, HEIGHT);
+    this.muse = muse;
+    float yp = UIWindow.TITLE_LABEL_HEIGHT;
+
+    final BooleanParameter bMuseActivated = new BooleanParameter("bMuseActivated");
+
+    new UIButton(4, yp, WIDTH -8, 20)
+      .setActiveLabel("Muse Activated")
+      .setParameter(bMuseActivated)
+      .setInactiveLabel("Muse Deactivated")
+      .addToContainer(this);
+    bMuseActivated.addListener(new LXParameterListener() {
+      public void onParameterChanged(LXParameter parameter) {
+        museActivated = parameter.getValue() > 0.;
+      }
+    });
+    yp += 24;
+
+  }
+
+}
+
+/** ********************************************************** 
+ * UIMuseHUD
+ ************************************************************************** */
+
+public class UIMuseHUD extends UIWindow {
+  private final static int WIDTH = 120;
+  private final static int HEIGHT = 120;
+  private final MuseHUD museHUD;
+
+  public UIMuseHUD(UI ui, MuseHUD museHUD, float x, float y) {
+    super(ui, "MUSE HUD", x, y, museHUD.WIDTH, museHUD.HEIGHT);
+    this.museHUD = museHUD;
+  }
+  protected void onDraw(UI ui, PGraphics pg) {
+    super.onDraw(ui, pg);
+    museHUD.drawHUD(pg);
+    // image(pg, mouseX-pg.width/2-VIEWPORT_WIDTH, mouseY-pg.height/2-VIEWPORT_HEIGHT);
+    // pg.fill(#FFFFFF);
+    // pg.rect(0,24,width,height);
+    redraw();
+  }
+}
