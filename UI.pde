@@ -28,7 +28,7 @@ class UIBars extends UI3dComponent {
       pg.rotateZ(bar.theta);
       pg.rotateY(-bar.azimuth);
       //drawCylinder(pg, bar.length, 1.0, LXColor.WHITE);
-      
+
       for (LXPoint point : bar.points) {
         drawCylinder(pg, bar.spacing, BAR_RADIUS, colors[point.index]);
         pg.translate(bar.spacing, 0.0, 0.0);
@@ -70,7 +70,7 @@ class UIMimsyControls extends UICollapsibleSection {
     setTitle("RENDER");
     setLayout(UI2dContainer.Layout.VERTICAL);
     setChildMargin(2);
-    
+
     this.pointsVisible = (UIButton) new UIButton(0, 0, getContentWidth(), 18) {
       public void onToggle(boolean on) {
         ui.preview.pointCloud.setVisible(on);
@@ -79,7 +79,7 @@ class UIMimsyControls extends UICollapsibleSection {
     .setLabel("Points")
     .setActive(ui.preview.pointCloud.isVisible())
     .addToContainer(this);
-    
+
     this.ddVisible = (UIButton) new UIButton(0, 0, getContentWidth() / 3 - 4, 18) {
       public void onToggle(boolean on) {
         uiBarsDD.setVisible(on);
@@ -88,7 +88,7 @@ class UIMimsyControls extends UICollapsibleSection {
     .setLabel("DD")
     .setActive(uiBarsDD.isVisible())
     .addToContainer(this);
-     
+
     this.tlVisible = (UIButton) new UIButton(0, 0, getContentWidth() / 3 - 4, 18) {
       public void onToggle(boolean on) {
         uiBarsTL.setVisible(on);
@@ -106,7 +106,7 @@ class UIMimsyControls extends UICollapsibleSection {
     .setLabel("TR")
     .setActive(uiBarsTR.isVisible())
     .addToContainer(this);
-    
+
   }
 }
 
@@ -178,11 +178,11 @@ class UINodes extends UI3dComponent {
 
 
 class UIWalls extends UI3dComponent {
-  
+
   private final float WALL_MARGIN = 2*FEET;
   private final float WALL_SIZE = model.xRange + 2*WALL_MARGIN;
   private final float WALL_THICKNESS = 1*INCHES;
-  
+
   protected void onDraw(UI ui, PGraphics pg) {
     fill(#666666);
     noStroke();
@@ -239,15 +239,15 @@ class UISimulationControl extends UIWindow {
 }
 
 
-
+/*
 class UIComponentsDemo extends UIWindow {
-  
-  static final int NUM_KNOBS = 4; 
-  final BoundedParameter[] knobParameters = new BoundedParameter[NUM_KNOBS];  
-  
+
+  static final int NUM_KNOBS = 4;
+  final BoundedParameter[] knobParameters = new BoundedParameter[NUM_KNOBS];
+
   UIComponentsDemo(UI ui, float x, float y) {
     super(ui, "UI COMPONENTS", x, y, 140, 10);
-    
+
     for (int i = 0; i < knobParameters.length; ++i) {
       knobParameters[i] = new BoundedParameter("Knb" + (i+1), i+1, 0, 4);
       knobParameters[i].addListener(new LXParameterListener() {
@@ -256,21 +256,21 @@ class UIComponentsDemo extends UIWindow {
         }
       });
     }
-    
+
     y = UIWindow.TITLE_LABEL_HEIGHT;
-    
+
     new UIButton(4, y, width-8, 20)
     .setLabel("Toggle Button")
     .addToContainer(this);
     y += 24;
-    
+
     new UIButton(4, y, width-8, 20)
     .setActiveLabel("Boop!")
     .setInactiveLabel("Momentary Button")
     .setMomentary(true)
     .addToContainer(this);
     y += 24;
-    
+
     for (int i = 0; i < 4; ++i) {
       new UIKnob(4 + i*34, y)
       .setParameter(knobParameters[i])
@@ -278,7 +278,7 @@ class UIComponentsDemo extends UIWindow {
       .addToContainer(this);
     }
     y += 48;
-    
+
     for (int i = 0; i < 4; ++i) {
       new UISlider(UISlider.Direction.VERTICAL, 4 + i*34, y, 30, 60)
       .setParameter(new BoundedParameter("VSl" + i, (i+1)*.25))
@@ -286,7 +286,7 @@ class UIComponentsDemo extends UIWindow {
       .addToContainer(this);
     }
     y += 80;
-    
+
     for (int i = 0; i < 2; ++i) {
       new UISlider(4, y, width-8, 24)
       .setParameter(new BoundedParameter("HSl" + i, (i + 1) * .25))
@@ -294,30 +294,30 @@ class UIComponentsDemo extends UIWindow {
       .addToContainer(this);
       y += 44;
     }
-    
+
     new UIToggleSet(4, y, width-8, 24)
     .setParameter(new DiscreteParameter("Ltrs", new String[] { "A", "B", "C", "D" }))
     .addToContainer(this);
     y += 28;
-    
+
     for (int i = 0; i < 4; ++i) {
       new UIIntegerBox(4 + i*34, y, 30, 22)
       .setParameter(new DiscreteParameter("Dcrt", 10))
       .addToContainer(this);
     }
     y += 26;
-    
+
     new UILabel(4, y, width-8, 24)
     .setLabel("This is just a label.")
     .setTextAlignment(CENTER, CENTER)
     .setBorderColor(ui.theme.getControlDisabledColor())
     .addToContainer(this);
     y += 28;
-    
+
     setSize(width, y);
   }
-} 
-
+}
+*/
 
 public class UICameraControlMimsy extends UIWindow {
 
@@ -326,7 +326,7 @@ public class UICameraControlMimsy extends UIWindow {
 
   public UICameraControlMimsy(UI ui, UI3dContext context, float x, float y) {
     super(ui, "CAMERA", x, y, WIDTH, HEIGHT);
-    
+
     float xp = 5;
     float yp = UIWindow.TITLE_LABEL_HEIGHT;
 
@@ -348,57 +348,62 @@ public class UICameraControlMimsy extends UIWindow {
 
 }
 
-/** ********************************************************** 
+/** **********************************************************
  * UIMuseControl
  ************************************************************************** */
-class UIMuseControl extends UIWindow {
+class UIMuseControl extends UICollapsibleSection {
   // requires the MuseConnect and MuseHUD objects to be created on the global space
   private MuseConnect muse;
-  private final static int WIDTH = 140;
-  private final static int HEIGHT = 50;
+  public final UIButton museEnabledBtn;
 
-  public UIMuseControl(UI ui, MuseConnect muse, float x, float y) {
-    super(lx.ui, "MUSE CONTROL", x, y, WIDTH, HEIGHT);
+  public UIMuseControl(final LXStudio.UI ui, MuseConnect muse) {
+    super(ui, 0, 0, ui.leftPane.global.getContentWidth(), 200);
+    setTitle("MUSE CONTROL");
+    setLayout(UI2dContainer.Layout.VERTICAL);
+    setChildMargin(2);
     this.muse = muse;
-    float yp = UIWindow.TITLE_LABEL_HEIGHT;
 
-    final BooleanParameter bMuseActivated = new BooleanParameter("bMuseActivated");
 
-    new UIButton(4, yp, WIDTH -8, 20)
-      .setActiveLabel("Muse Activated")
-      .setParameter(bMuseActivated)
-      .setInactiveLabel("Muse Deactivated")
-      .addToContainer(this);
-    bMuseActivated.addListener(new LXParameterListener() {
-      public void onParameterChanged(LXParameter parameter) {
-        museActivated = parameter.getValue() > 0.;
+    this.museEnabledBtn = (UIButton) new UIButton(0, 0, getContentWidth(), 18) {
+      public void onToggle(boolean on) {
+        // UGLY: this sets the global parameters museEnabled
+        // This parameter should be stored in the ui somehow
+        museEnabled = on;
       }
-    });
-    yp += 24;
-
+    }
+    .setActiveLabel("Muse Enabled")
+    .setInactiveLabel("Muse Disabled")
+    .addToContainer(this);
   }
-
 }
 
-/** ********************************************************** 
+/** **********************************************************
  * UIMuseHUD
  ************************************************************************** */
-
-public class UIMuseHUD extends UIWindow {
+public class UIMuseHUD extends UICollapsibleSection {
   private final static int WIDTH = 120;
   private final static int HEIGHT = 120;
   private final MuseHUD museHUD;
 
-  public UIMuseHUD(UI ui, MuseHUD museHUD, float x, float y) {
-    super(ui, "MUSE HUD", x, y, museHUD.WIDTH, museHUD.HEIGHT);
+  public UIMuseHUD(final LXStudio.UI ui, MuseHUD museHUD) {
+    super(ui, 0, 0, ui.leftPane.global.getContentWidth(), 200);
+    setTitle("MUSE HUD");
+    setBackgroundColor(ui.theme.getPaneBackgroundColor());
+    setBorderRounding(4);
+
+    setLayout(UI2dContainer.Layout.VERTICAL);
+    setChildMargin(2);
     this.museHUD = museHUD;
   }
-  protected void onDraw(UI ui, PGraphics pg) {
+  public void onDraw(UI ui, PGraphics pg) {
     super.onDraw(ui, pg);
-    museHUD.drawHUD(pg);
-    // image(pg, mouseX-pg.width/2-VIEWPORT_WIDTH, mouseY-pg.height/2-VIEWPORT_HEIGHT);
+    // pg.rect(0, 0, WIDTH, HEIGHT);
+    // pg.fill(#FFFFFF);
+    // redraw();
+    // museHUD.drawHUD(pg);
     // pg.fill(#FFFFFF);
     // pg.rect(0,24,width,height);
-    redraw();
+    // redraw();
   }
 }
+
