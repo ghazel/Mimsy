@@ -42,7 +42,7 @@ UI3dComponent uiNodes;
 
 // define Muse globals
 UIMuseControl uiMuseControl;
-UIMuseHUD uiMuseHUD;
+// UIMuseHUD uiMuseHUD;
 MuseConnect muse;
 MuseHUD museHUD;
 int MUSE_OSCPORT = 5000;
@@ -120,12 +120,13 @@ void setup() {
                                               .addToContainer(ui.leftPane.global);
 
         // add Muse UI components
-        uiMuseControl = (UIMuseControl) new UIMuseControl(ui, muse).setExpanded(true).addToContainer(ui.leftPane.global);
-        uiMuseHUD = (UIMuseHUD) new UIMuseHUD(ui, museHUD)
-                                    .addToContainer(ui.leftPane.global);
+        uiMuseControl = (UIMuseControl) new UIMuseControl(ui, muse, museHUD).setExpanded(true).addToContainer(ui.leftPane.global);
+        // uiMuseHUD = (UIMuseHUD) new UIMuseHUD(ui, museHUD)
+        //                             .setExpanded(true)
+        //                             .addToContainer(ui.leftPane.global);
 
         // Narrow angle lens, for a fuller visualization
-        //ui.preview.perspective.setValue(30);
+        ui.preview.perspective.setValue(30);
 
        // uiTreeControls = (UITreeControls) new UITreeControls(ui).addToContainer(ui.leftPane.global);
         out("Initialized LX UI");

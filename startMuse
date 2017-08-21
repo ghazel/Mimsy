@@ -1,0 +1,2 @@
+# simple script to star the muse interface
+muse-io --preset 14 --osc osc.udp://localhost:5000

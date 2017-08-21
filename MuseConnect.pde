@@ -164,8 +164,8 @@ class MuseConnect {
 
   // select a single method to flatten the 4 sensor array for output in the getX() methods
   private float flattenSensor(float[] arr) {
-    return arr[1]; // just use front left (FP1) for now
-    // return averageFront(arr);
+    // return arr[1]; // just use front left (FP1) for now
+    return averageFront(arr);
     // return average(arr);
   }
 
@@ -330,19 +330,23 @@ class MuseHUD {
   * Could definitely use a revamp
   */
   MuseConnect muse; //have reference to muse object
-  PGraphics pgMuseHUD; //have basic PGraphics image to display on screen
 
-  public final int WIDTH = 140;
-  public final int HEIGHT = 240;
+  public final int WIDTH = 180; // this can change with the UI
+  public final int HEIGHT = 160;
   public final int VOFFSET = -10;
+  public final int HEAD_CENTER_H = HEIGHT - 30;
+  public final int HEAD_CENTER_W = WIDTH - 40;
 
-  public final int GRAPHBASE = 100;
+  public final int SENSOR_W = 8;
+  public final int SENSOR_H = 10;
+
+  public final int GRAPHBASE = 90;
   public final int GRAPHHEIGHT = 80;
   public final int BARWIDTH = 8;
 
 
   // colors for muse horseshoe HUD
-//  colorMode(RGB, 255);
+  // colorMode(RGB, 255);
   private color morange = 0;
   private color mgreen = 0;
   private color mblue = 0;
@@ -357,7 +361,6 @@ class MuseHUD {
     if (muse == null) {
       println("Muse object has not been instantiated yet");
     }
-    pgMuseHUD = createGraphics(WIDTH, HEIGHT);
 
     // set up horseshoe colors
     colorMode(RGB, 255);
@@ -384,22 +387,17 @@ class MuseHUD {
     int backColor = 50; //dark gray
     int foreColor = 200; // not quite white
     fill(foreColor);
-    stroke(0);
-    image.beginDraw();
-    image.smooth();
-    image.background(0xff444444); // color from ui.theme.windowBackgroundColor
-    image.stroke(0);
     image.fill(backColor);
     image.ellipseMode(CENTER);
-    image.ellipse(WIDTH/2, HEIGHT-60+VOFFSET, 35, 40); //head
-
+    image.ellipse(HEAD_CENTER_W, HEAD_CENTER_H, 45, 50); //head
     // println("Muse state: " + str(muse.touching_forehead) + " " + str(muse.horseshoe[0]) + " " + str(muse.horseshoe[1]) + " " + str(muse.horseshoe[2]) + " " + str(muse.horseshoe[3]));
 
+    // draw the center contact impedance
     image.stroke(0);
-    image.strokeWeight(3);
+    image.strokeWeight(2);
     if (muse.touching_forehead==1)  image.fill(0);
     else image.fill(backColor);
-    image.ellipse(WIDTH/2, HEIGHT-82+VOFFSET, 5, 4); //on_forehead
+    image.ellipse(HEAD_CENTER_W, HEAD_CENTER_H - 18, SENSOR_H-2, SENSOR_W-2); //on_forehead
 
     if (muse.touching_forehead==1) {
       // horseshoe values: 1= good, 2=ok, 3=bad
@@ -409,37 +407,37 @@ class MuseHUD {
       if (muse.horseshoe[0]==1) {  image.fill(morange); }
       else if(muse.horseshoe[0]==2) { image.fill(morangel); }
       else { image.fill(backColor); }
-      image.ellipse(WIDTH/2 - 17, HEIGHT-45+VOFFSET, 6, 8); // TP9
+      image.ellipse(HEAD_CENTER_W - 12, HEAD_CENTER_H + 12, SENSOR_W, SENSOR_H); // TP9
 
       // left frontal
       image.stroke(mgreen);
       if (muse.horseshoe[1]==1) {  image.fill(mgreen); }
       else if(muse.horseshoe[1]==2) { image.fill(mgreenl); }
       else { image.fill(backColor); }
-      image.ellipse(WIDTH/2 - 20, HEIGHT-70+VOFFSET, 6, 8); //FP1
+      image.ellipse(HEAD_CENTER_W - 15, HEAD_CENTER_H - 8, SENSOR_W, SENSOR_H); //FP1
 
       // right frontal
       image.stroke(mblue);
       if (muse.horseshoe[2]==1) {  image.fill(mblue); }
       else if(muse.horseshoe[2]==2) { image.fill(mbluel); }
       else { image.fill(backColor); }
-      image.ellipse(WIDTH/2 + 20, HEIGHT-70+VOFFSET, 6, 8); //FP2
+      image.ellipse(HEAD_CENTER_W + 15, HEAD_CENTER_H - 8, SENSOR_W, SENSOR_H); //FP2
 
       // right temporal
       image.stroke(mred);
       if (muse.horseshoe[3]==1) {  image.fill(mred); }
       else if(muse.horseshoe[3]==2) { image.fill(mredl); }
       else { image.fill(backColor); }
-      image.ellipse(WIDTH/2 + 17, HEIGHT-45+VOFFSET, 6, 8); //TP10
+      image.ellipse(HEAD_CENTER_W + 12, HEAD_CENTER_H + 12, SENSOR_W, SENSOR_H); //TP10
     }
     else {
       // we probably dont have the headset on, no point in trying to color the rest
       image.stroke(0);
       image.fill(backColor);
-      image.ellipse(WIDTH/2 - 17, HEIGHT-45+VOFFSET, 6, 8); // TP9
-      image.ellipse(WIDTH/2 - 20, HEIGHT-70+VOFFSET, 6, 8); //FP1
-      image.ellipse(WIDTH/2 + 20, HEIGHT-70+VOFFSET, 6, 8); //FP2
-      image.ellipse(WIDTH/2 + 17, HEIGHT-45+VOFFSET, 6, 8); //TP10
+      image.ellipse(HEAD_CENTER_W - 12, HEAD_CENTER_H + 12, SENSOR_W, SENSOR_H); // TP9
+      image.ellipse(HEAD_CENTER_W - 15, HEAD_CENTER_H - 8, SENSOR_W, SENSOR_H); //FP1
+      image.ellipse(HEAD_CENTER_W + 15, HEAD_CENTER_H - 8, SENSOR_W, SENSOR_H); //FP2
+      image.ellipse(HEAD_CENTER_W + 12, HEAD_CENTER_H + 12, SENSOR_W, SENSOR_H); //TP10
     }
 
     int battery = int(muse.battery_level);
@@ -456,8 +454,9 @@ class MuseHUD {
     }
     image.stroke(battfill);
     image.fill(battfill);
-    image.textSize(16);
-    image.text(battstr, 3, HEIGHT-10+VOFFSET);
+    image.textSize(14);
+    image.textAlign(LEFT);
+    image.text(battstr, 30, HEIGHT-25);
 
     // plot the graphs
     image.stroke(0);
@@ -466,10 +465,11 @@ class MuseHUD {
     image.line(50, GRAPHBASE, 50, GRAPHBASE-GRAPHHEIGHT);
     textSize(10);
     image.fill(200);
-    // image.text("M C      D T A B G", 13, GRAPHBASE);
-    image.text("M C      \u03B4 \u03B8 \u03B1 \u03B2 \u03B3", 13, GRAPHBASE);
+    image.text("M C       D T A B G", 18, GRAPHBASE+12);
+    // image.text("M C      \u03B4 \u03B8 \u03B1 \u03B2 \u03B3", 13, GRAPHBASE);
 
     if (muse.signalIsGood()) { // (true)
+      // println(muse.getMellow(), muse.getConcentration());
       image.stroke(0);
       image.fill(7, 145, 178); //blue
       image.rect(15, GRAPHBASE, BARWIDTH, barHeight(GRAPHHEIGHT, muse.getMellow()));
@@ -492,15 +492,9 @@ class MuseHUD {
     image.endDraw();
   }
 
-  // use this if drawing in MuseHUD's buffer
-  public void drawHUD() {
-    //this.pgMuseHUD = updateHUD(this.pgMuseHUD);
-    updateHUD(this.pgMuseHUD);
-  }
 
   // use this version if drawing in someone else's buffer
   public void drawHUD(PGraphics buffer) {
-    //buffer = updateHUD(buffer);
     updateHUD(buffer);
   }
 }

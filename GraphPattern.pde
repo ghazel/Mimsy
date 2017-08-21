@@ -846,11 +846,11 @@ public class PixiePattern extends GraphPattern {
       new BoundedParameter("NUM", 100, 0, 1000);
   // How fast each pixie moves, in pixels per second.
   private final BoundedParameter speed =
-      new BoundedParameter("SPD", 50.0, 10.0, 200.0);
+      new BoundedParameter("SPD", 50.0, 10.0, 150.0);
   // How long the trails persist. (Decay factor for the trails, each frame.)
   // XXX really should be scaled by frame time
   private final BoundedParameter fade =
-      new BoundedParameter("FADE", 0.9, 0.8, .99);
+      new BoundedParameter("FADE", 0.9, 0.8, .97);
   // Brightness adjustment factor.
   private final BoundedParameter brightness =
       new BoundedParameter("BRIGHT", 1.0, .25, 2.0);
@@ -906,8 +906,10 @@ public class PixiePattern extends GraphPattern {
     float speedRate = 0;
 
     if (museEnabled) {
-      fadeRate = map(muse.getMellow(), 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
-      speedRate = map(muse.getConcentration(), 0.0, 1.0, (float)20.0, 300);
+      // NOTE: this usually uses getMellow() and getConcentration(), but
+      // recent versions of muse-io look like they don't catch those values any longer :(
+      fadeRate = map(muse.getAlpha(), 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
+      speedRate = map(muse.getGamma(), 0.0, 1.0, (float)speed.range.min, (float)speed.range.max);
     }
     else {
       fadeRate = fade.getValuef();

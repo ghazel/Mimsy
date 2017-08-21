@@ -356,14 +356,12 @@ class UIMuseControl extends UICollapsibleSection {
   private MuseConnect muse;
   public final UIButton museEnabledBtn;
 
-  public UIMuseControl(final LXStudio.UI ui, MuseConnect muse) {
+  public UIMuseControl(final LXStudio.UI ui, MuseConnect muse, MuseHUD museHUD) {
     super(ui, 0, 0, ui.leftPane.global.getContentWidth(), 200);
     setTitle("MUSE CONTROL");
     setLayout(UI2dContainer.Layout.VERTICAL);
     setChildMargin(2);
     this.muse = muse;
-
-
     this.museEnabledBtn = (UIButton) new UIButton(0, 0, getContentWidth(), 18) {
       public void onToggle(boolean on) {
         // UGLY: this sets the global parameters museEnabled
@@ -374,36 +372,41 @@ class UIMuseControl extends UICollapsibleSection {
     .setActiveLabel("Muse Enabled")
     .setInactiveLabel("Muse Disabled")
     .addToContainer(this);
+
+    // add the HUD
+    new UIMuseHUD(ui, museHUD, 0, 0, getContentWidth()).addToContainer(this);
+
+  }
+
+  class UIMuseHUD extends UI2dContainer {
+    private final static int WIDTH = 140;
+    private final static int HEIGHT = 160;
+    private final int VOFFSET = -10;
+
+    private final MuseHUD museHUD;
+    static final int PADDING = 4;
+
+    protected boolean expanded = true;
+
+    float xp = 5;
+    float yp = UIWindow.TITLE_LABEL_HEIGHT;
+
+    public UIMuseHUD(UI ui, MuseHUD museHUD, float x, float y, float w) {
+      super(x, y, w, HEIGHT);
+      // setTitle("MUSE HUD");
+
+      // new UILabel(PADDING, 2*PADDING, 100, 16)
+      // .setLabel("MUSE HUD")
+      // .setTextAlignment(PConstants.LEFT, PConstants.TOP)
+      // .addToContainer(this);
+      this.museHUD = museHUD;
+    }
+
+    public void onDraw(UI ui, PGraphics pg) {
+      museHUD.drawHUD(pg);
+      redraw();
+    }
   }
 }
 
-/** **********************************************************
- * UIMuseHUD
- ************************************************************************** */
-public class UIMuseHUD extends UICollapsibleSection {
-  private final static int WIDTH = 120;
-  private final static int HEIGHT = 120;
-  private final MuseHUD museHUD;
-
-  public UIMuseHUD(final LXStudio.UI ui, MuseHUD museHUD) {
-    super(ui, 0, 0, ui.leftPane.global.getContentWidth(), 200);
-    setTitle("MUSE HUD");
-    setBackgroundColor(ui.theme.getPaneBackgroundColor());
-    setBorderRounding(4);
-
-    setLayout(UI2dContainer.Layout.VERTICAL);
-    setChildMargin(2);
-    this.museHUD = museHUD;
-  }
-  public void onDraw(UI ui, PGraphics pg) {
-    super.onDraw(ui, pg);
-    // pg.rect(0, 0, WIDTH, HEIGHT);
-    // pg.fill(#FFFFFF);
-    // redraw();
-    // museHUD.drawHUD(pg);
-    // pg.fill(#FFFFFF);
-    // pg.rect(0,24,width,height);
-    // redraw();
-  }
-}
 
