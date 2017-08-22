@@ -7,12 +7,12 @@ public static class GraphModel extends LXModel {
   public List<GraphModel> subGraphs = new ArrayList<GraphModel>();
   public String layer;
   public List<String> layers = new ArrayList<String>();
- 
+
   // Connectivity matrix for looking up bars by (ordered) node pair
   private Bar[][] barMatrix;
 
   //************************************************************* CONSTRUCTORS
-  
+
   /*
    * Empty
    */
@@ -32,7 +32,7 @@ public static class GraphModel extends LXModel {
     this.bars = bars;
     this.addBarsToMatrix();
   }
-  
+
   /*
    * Compose from subgraphs
    */
@@ -42,10 +42,10 @@ public static class GraphModel extends LXModel {
    // TODO: Copy bars into main graph
   }
 
-  
-  
+
+
   //**************************************************************** FACTORIES
-  
+
   /*
    * Compose from an ordered traversal of nodes
    */
@@ -54,7 +54,7 @@ public static class GraphModel extends LXModel {
     for (int b = 0; b < ordering.length; b++) {
       Node n1 = nodes[ordering[b][0]];
       Node n2 = nodes[ordering[b][1]];
-      System.out.format("Bar [%d]: %2d %2d / %2s %2s\n", 
+      System.out.format("Bar [%d]: %2d %2d / %2s %2s\n",
         b, n1.index, n2.index, dd.nodeNames[n1.index], dd.nodeNames[n2.index]);
       Bar bar = new Bar(n1, n2);
       bars[b] = bar;
@@ -70,14 +70,14 @@ public static class GraphModel extends LXModel {
     }
     Bar[] bars = new Bar[bar_count];
     int b = 0;
-    for(GraphModel graph : graphs) { 
+    for(GraphModel graph : graphs) {
       for(Bar bar : graph.bars) {
         bars[b++] = bar;
       }
     }
     return bars;
   }
-   
+
 
   //****************************************************************** SETTERS
   /**
@@ -100,7 +100,7 @@ public static class GraphModel extends LXModel {
   /**
    * Add subgraphs to the model
    */
-  public GraphModel addSubGraph(GraphModel graph) { 
+  public GraphModel addSubGraph(GraphModel graph) {
     this.layers.add(graph.layer);
     this.subGraphs.add(graph);
     this.addBarsToMatrix();
@@ -156,7 +156,7 @@ public static class GraphModel extends LXModel {
   public ArrayList<LXPoint> getRandomPoints(int num_requested) {
     Random randomized = new Random();
     ArrayList<LXPoint> returnpoints = new ArrayList<LXPoint>();
-    
+
     while (returnpoints.size () < num_requested) {
       returnpoints.add(this.getRandomPoint());
     }
@@ -167,7 +167,7 @@ public static class GraphModel extends LXModel {
 
   //******************************************************************** NODES
 
-  
+
   /*
   public Node getRandomNode() {
     Random randomized = new Random();
@@ -178,10 +178,10 @@ public static class GraphModel extends LXModel {
   public Node getRandomNode(Object... args) {
     Random randomized = new Random();
     List<Node> nodes = Arrays.asList(this.nodes);
-    for (Object arg : args) { 
+    for (Object arg : args) {
       List<Node> newNodes = new ArrayList<Node>();
       if (arg instanceof Node) {
-        for (Node node : nodes) { 
+        for (Node node : nodes) {
           if (barMatrix[((Node)arg).index][node.index] != null) {
             newNodes.add(node);
           }
@@ -203,10 +203,10 @@ public static class GraphModel extends LXModel {
   public Bar getRandomBar(Object... args) {
     Random randomized = new Random();
     List<Bar> bars = Arrays.asList(this.bars);
-    for (Object arg : args) { 
+    for (Object arg : args) {
       List<Bar> newBars = new ArrayList<Bar>();
       if (arg instanceof Node) {
-        for (Bar bar : bars) { 
+        for (Bar bar : bars) {
           if (bar.node1 == arg | bar.node2 == arg) {
             newBars.add(bar);
           }
@@ -235,7 +235,7 @@ public static class GraphModel extends LXModel {
       }
     }
   }
-    
+
 
 
   /*
@@ -291,9 +291,9 @@ public static class Node extends PVector{
   //public final List<String> properties = new ArrayList<String>();
   //public final List<Node> adjacent_nodes = new ArrayList<Node>();
   //public final List<Bar> adjacent_bars = new ArrayList<Bar>();
- 
+
   /*
-   * Full Constructor 
+   * Full Constructor
    */
   public Node(float x, float y, float z) {
     super(x, y, z);
@@ -345,8 +345,8 @@ public static class Bar extends LXModel {
   public float azimuth;
   public float elevation;
 
-  /** 
-   * Full Constructor 
+  /**
+   * Full Constructor
    */
   public Bar(Node node1, Node node2) {
     super(new Fixture(node1, node2));
@@ -377,7 +377,7 @@ public static class Bar extends LXModel {
     this.name = parent.name;
     this.tags = parent.tags;
     this.isReversed = reversed;
-    
+
     if (reversed) {
       this.node1 = parent.node2;
       this.node2 = parent.node1;
@@ -407,7 +407,7 @@ public static class Bar extends LXModel {
     norm = heading.copy().normalize();
     length = heading.mag();
     spacing = length / (float)points.length;
-    
+
     float rxz = (float) Math.sqrt(norm.x * norm.x + norm.z * norm.z);
     //theta = (float) Math.atan2(norm.y, norm.x);
     //azimuth = (float) Math.atan2(norm.z, norm.x);
@@ -430,14 +430,14 @@ public static class Bar extends LXModel {
       + "N2 <%5.0f %5.0f %5.0f> "
       + "HH <%5.0f %5.0f %5.0f> "
       + "L %5.0f S %5.2f  T %5.0f  Z %5.0f  E %5.0f",
-      name, points.length, 
+      name, points.length,
       node1.x, node1.y, node1.z,
       node2.x, node2.y, node2.z,
       heading.x, heading.y, heading.z,
       length, spacing,
       degrees(theta),  degrees(azimuth), degrees(elevation));
   }
- 
+
   /**
    * Get indexes for first and last points in the bar.
    */

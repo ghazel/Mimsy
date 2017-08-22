@@ -86,9 +86,7 @@ void setup() {
   //initialize the Muse connection
   // TODO: this should gracefully handle lack of Muse OSC input
   muse = new MuseConnect(this, MUSE_OSCPORT);
-  println(muse);
   museHUD = new MuseHUD(muse);
-  println(museHUD);
   out("added Muse OSC parser and HUD");
 
 
@@ -121,9 +119,6 @@ void setup() {
 
         // add Muse UI components
         uiMuseControl = (UIMuseControl) new UIMuseControl(ui, muse, museHUD).setExpanded(true).addToContainer(ui.leftPane.global);
-        // uiMuseHUD = (UIMuseHUD) new UIMuseHUD(ui, museHUD)
-        //                             .setExpanded(true)
-        //                             .addToContainer(ui.leftPane.global);
 
         // Narrow angle lens, for a fuller visualization
         ui.preview.perspective.setValue(30);
@@ -144,121 +139,6 @@ void setup() {
     exit();
   }
 
-  //===================================================================== P3LX
-
-  //lx = new LXStudio(this, model, false);
-  //anything that extends LXPattern gets loaded automatically now (using reflection)
-
-  //lx.setPatterns(patterns(lx));
-  //out("Finished Loading Patterns");
-
-  //================================================================= 3D Model
-
-
-
-  ////-------------- Prepare 3D Reference Elements
-  //uiWalls = new UIWalls();
-  //uiWalls.setVisible(false);
-  //uiNodes = new UINodes();
-
-  ////-------------- Prepare 3D Point Clouds
-  //pointCloudDodecahedron
-  //  = new UIPointCloud(lx, model.getLayer(DD))
-  //        .setPointSize(DODECAHEDRON_BAR_THICKNESS);
-  //pointCloudTetraLeft
-  //  = new UIPointCloud(lx, model.getLayer(TL))
-  //        .setPointSize(TETRAHEDRON_BAR_THICKNESS);
-  //pointCloudTetraRight
-  //  = new UIPointCloud(lx, model.getLayer(TR))
-  //        .setPointSize(TETRAHEDRON_BAR_THICKNESS);
-
-
-  ////-------------- Build the 3D UI
-  //uiContext =
-  //  // A camera layer makes an OpenGL layer that we can easily
-  //  // pivot around with the mouse
-  //  new UI3dContext(lx.ui) {
-
-  //    protected void beforeDraw(UI ui, PGraphics pg) {
-  //      int H = UI_LIGHT_HUE;
-  //      int S = UI_LIGHT_SATURATION;
-  //      int B = UI_LIGHT_BRIGHTNESS;
-
-  //      //-------- Lights!
-  //      for (float mx : new float[]{model.xMin, model.xMax}) {
-  //        for (float my : new float[]{model.yMin, model.yMax}) {
-  //          for (float mz : new float[]{model.zMin, model.zMax}) {
-  //            float x = mx*10;
-  //            float y = my*10;
-  //            float z = mz*10;
-  //            pointLight(H,S,B, x, y, z);
-  //            pushMatrix();
-  //            translate(x,y,z);
-  //            sphere(10.0);
-  //            popMatrix();
-  //          }
-  //        }
-  //      }
-
-  //      int scale = 6;
-  //      if (uiOrthoCamera.isOn()) {
-  //        ortho(-width/scale, width/scale,
-  //              -height/scale, height/scale,
-  //              clipNear.getValuef() * radius.getValuef() / 100.0,
-  //              clipFar.getValuef() * radius.getValuef() / 100.0 * 2.0);
-  //      }
-  //      hint(ENABLE_DEPTH_TEST);
-  //    }
-  //    protected void afterDraw(UI ui, PGraphics pg) {
-  //      // Turn off the lights and kill depth testing before the 2D layers
-  //      noLights();
-  //      hint(DISABLE_DEPTH_TEST);
-  //    }
-  //  }
-
-  //  //------------ Camera!
-  //  .setRadius(1000)
-  //  .setPerspective(0)
-  //  //.setDepth(4)
-  //  .setCenter(model.cx, model.cy, model.cz)
-  //  //.setPhi(-PI/2) // Rotate model around X
-  //  //.setTheta(-PI/2) // Rotate around Y
-
-
-  //  //------------ Action! (actually just some stuff)
-  //  // Let's add a point cloud of our animation points
-  //  //.addComponent(pointCloud = new UIPointCloud(lx, model).setPointSize(BAR_THICKNESS))
-  //  .addComponent(pointCloudDodecahedron)
-  //  .addComponent(pointCloudTetraLeft)
-  //  .addComponent(pointCloudTetraRight)
-  //  // And a custom UI object of our own
-  //  .addComponent(uiWalls)
-  //  .addComponent(uiNodes)
-  //;
-
-  //lx.ui.addLayer(uiContext);
-  //out("Finished 3D Layer");
-
-  ////=========================================================== 2D Control GUI
-  //UI2dContext[] layers = new UI2dContext[] {
-  //  // Left Side
-  //  new UIChannelControl      (lx.ui, lx.engine.getChannel(0), 4,   4),
-  //  new UISimulationControl   (lx.ui,                          4, 326),
-  //  new UIEngineControl       (lx.ui,                          4, 466),
-  //  new UICameraControlMimsy  (lx.ui, uiContext,               4, 600),
-
-  //  // Right Side
-  //  new UIComponentsDemo   (lx.ui,                          width-144, 4),
-  //};
-
-  //for (UI2dContext layer : layers) {
-  //  lx.ui.addLayer(layer);
-  //}
-
-
-
-  out("Finished 2D Layer");
-
 
   //==================================================== Output to Controllers
   // create outputs via CortexOutput
@@ -274,8 +154,8 @@ void setup() {
 
 void draw() {
   // Wipe the frame...
-  background(#292929);
-  //background(#888888);
+  // background(#292929);
+
   // ...and everything else is handled by P3LX!
   drawFPS();
 

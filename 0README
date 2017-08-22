@@ -15,11 +15,11 @@ Mimsy - extends LXGraphModel
 
 
   LXGraphModel needs to be nestable
-    
+
     pass existing nodes/bars to it, or a whole LXGraphModel
-   
-    need to detect shared nodes/bars, but in sub-models only traverse 
-      connections within the subgraph 
+
+    need to detect shared nodes/bars, but in sub-models only traverse
+      connections within the subgraph
 
     but if the larger model is composed of submodels, it will be the only one
     that knows about all the connectinos
@@ -36,6 +36,6 @@ Mimsy - extends LXGraphModel
     do need to about the mapping from the dodecahedron to the tetrahedra though.
 
     trying to manage multiple copies of each node, for face, tetra left, etc,
-    will be a wild pain in the ass. 
+    will be a wild pain in the ass.
 
-    
+

@@ -2,12 +2,12 @@
  * This file has a bunch of example patterns, each illustrating the key
  * concepts and tools of the LX framework.
  */
- 
+
 public class LayerDemoPattern extends LXPattern {
-  
+
   private final BoundedParameter colorSpread = new BoundedParameter("Clr", 0.5, 0, 3);
   private final BoundedParameter stars = new BoundedParameter("Stars", 100, 0, 100);
-  
+
   public LayerDemoPattern(LX lx) {
     super(lx);
     addParameter(colorSpread);
@@ -18,27 +18,27 @@ public class LayerDemoPattern extends LXPattern {
       addLayer(new StarLayer(lx));
     }
   }
-  
+
   public void run(double deltaMs) {
     // The layers run automatically
   }
-  
+
   public class CircleLayer extends LXLayer {
-    
-    private final SinLFO xPeriod = new SinLFO(3400, 7900, 11000); 
+
+    private final SinLFO xPeriod = new SinLFO(3400, 7900, 11000);
     private final SinLFO brightnessX = new SinLFO(model.xMin, model.xMax, xPeriod);
-  
+
     public CircleLayer(LX lx) {
       super(lx);
       addModulator(xPeriod).start();
       addModulator(brightnessX).start();
     }
-    
+
     public void run(double deltaMs) {
       // The layers run automatically
       float falloff = 100 / (4*FEET);
       for (LXPoint p : model.points) {
-        float yWave = model.yRange/2 * sin(p.x / model.xRange * PI); 
+        float yWave = model.yRange/2 * sin(p.x / model.xRange * PI);
         float distanceFromCenter = dist(p.x, p.y, model.cx, model.cy);
         float distanceFromBrightness = dist(p.x, abs(p.y - model.cy), brightnessX.getValuef(), yWave);
         colors[p.index] = LXColor.hsb(
@@ -49,18 +49,18 @@ public class LayerDemoPattern extends LXPattern {
       }
     }
   }
-  
+
   public class RodLayer extends LXLayer {
-    
+
     private final SinLFO zPeriod = new SinLFO(2000, 5000, 9000);
     private final SinLFO zPos = new SinLFO(model.zMin, model.zMax, zPeriod);
-    
+
     public RodLayer(LX lx) {
       super(lx);
       addModulator(zPeriod).start();
       addModulator(zPos).start();
     }
-    
+
     public void run(double deltaMs) {
       for (LXPoint p : model.points) {
         float b = 100 - dist(p.x, p.y, model.cx, model.cy) - abs(p.z - zPos.getValuef());
@@ -74,25 +74,25 @@ public class LayerDemoPattern extends LXPattern {
       }
     }
   }
-  
+
   public class StarLayer extends LXLayer {
-    
+
     private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
-    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
-    
+    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000));
+
     private int index = 0;
-    
-    public StarLayer(LX lx) { 
+
+    public StarLayer(LX lx) {
       super(lx);
       addModulator(maxBright).start();
       addModulator(brightness).start();
       pickStar();
     }
-    
+
     private void pickStar() {
       index = (int) random(0, model.size-1);
     }
-    
+
     public void run(double deltaMs) {
       if (brightness.getValuef() <= 0) {
         pickStar();
@@ -112,7 +112,7 @@ public class LayerDemoPattern extends LXPattern {
  * @author scouras
  ************************************************************************** */
 public class Psychedelic extends LXPattern {
- 
+
   double ms = 0.0;
   double offset = 0.0;
   private final BoundedParameter colorScheme = new BoundedParameter("SCM", 0, 3);
@@ -121,7 +121,7 @@ public class Psychedelic extends LXPattern {
   private final BoundedParameter colorHue = new BoundedParameter("HUE",  0., 0., 359.);
   private final BoundedParameter colorSat = new BoundedParameter("SAT", 90., 0., 100.);
   private final BoundedParameter colorBrt = new BoundedParameter("BRT", 80., 0., 100.);
-  private GeneratorPalette gp = 
+  private GeneratorPalette gp =
       new GeneratorPalette(
           new ColorOffset(0xDD0000).setHue(colorHue)
                                    .setSaturation(colorSat)
@@ -150,11 +150,11 @@ public class Psychedelic extends LXPattern {
     EV.bindKnob(colorBrt, 7);
     */
   }
-    
+
     public void run(double deltaMs) {
     int newScheme = (int)Math.floor(colorScheme.getValue());
-    if ( newScheme != scheme) { 
-      switch(newScheme) { 
+    if ( newScheme != scheme) {
+      switch(newScheme) {
         case 0: gp.setScheme(GeneratorPalette.ColorScheme.Analogous); break;
         case 1: gp.setScheme(GeneratorPalette.ColorScheme.Monochromatic); break;
         case 2: gp.setScheme(GeneratorPalette.ColorScheme.Triad); break;
@@ -166,7 +166,7 @@ public class Psychedelic extends LXPattern {
     ms += deltaMs;
     offset += deltaMs*cycleSpeed.getValuef()/1000.;
     int steps = (int)colorSpread.getValuef();
-    if (steps != gp.steps) { 
+    if (steps != gp.steps) {
       gp.setSteps(steps);
     }
     gp.reset((int)offset);
@@ -175,7 +175,7 @@ public class Psychedelic extends LXPattern {
     }
   }
 }
-  
+
 
 
 /*
@@ -191,11 +191,11 @@ public class StarBurst extends LXPattern {
   private final BoundedParameter burstFade =
     new BoundedParameter("FADE", 10.0, 0.0, 1000.0, QUAD_OUT);
 
-  
+
   private double lastBurst;
 
 
-  public StarBurst(LX lx) { 
+  public StarBurst(LX lx) {
     super(lx);
   }
 
@@ -216,14 +216,14 @@ public class StarBurst extends LXPattern {
   private ArrayList<Burst> bursts = new ArrayList<Burst>();
 
 
-  public void paintLinear(List<LXPoint> points, 
+  public void paintLinear(List<LXPoint> points,
                           double start, double finish, int color) {
     int _start  = int(Math.floor((double)points.size()*start));
     int _finish = int(Math.floor((double)points.size()*finish));
     paintLinear(points, _start, _finish, color);
   }
-  
-  public void paintLinear(List<LXPoint> points, 
+
+  public void paintLinear(List<LXPoint> points,
                           int start, int finish, int color) {
     for (int i = start; i < finish; i++) {
       points[i] = color;
@@ -232,9 +232,9 @@ public class StarBurst extends LXPattern {
 
 
   public void run(double deltaMs) {
-    
+
     double deltaS = deltaMs / 1000.0;
-    
+
     // Dim all the starbursts at Fade% / Second
     float fadeScale = burstFade.getValuef() * deltaS;
     for (LXPoint p : model.points) {
@@ -244,17 +244,17 @@ public class StarBurst extends LXPattern {
 
     // Is it time for a new star burst?
     double deltaBursts = 60.0 / burstRate;
-    if (lastBurst > deltaBursts) { 
-      bursts.add(new Burst()); 
+    if (lastBurst > deltaBursts) {
+      bursts.add(new Burst());
       lastBurst = 0.0;
     }
     lastBurst += deltaBursts;
-    
+
     // Purge completed starburst
     for (Burst burst : bursts) {
       if (burst.offset > 100.0) {
         bursts.remove(burst); } }
-    
+
     // ----- Burst!
     for (Burst burst : bursts) {
       for (Bar bar : burst.bars) {
@@ -268,24 +268,24 @@ public class StarBurst extends LXPattern {
 */
 
 
- 
+
 /** ****************************************************** RAINBOW BARREL ROLL
  * A colored plane of light rotates around an axis
  ************************************************************************* **/
 public class RainbowBarrelRoll extends LXPattern {
    float hoo;
    float anglemod = 0;
-    
+
   public RainbowBarrelRoll(LX lx){
      super(lx);
   }
-  
+
  public void run(double deltaMs) {
      anglemod=anglemod+1;
      if (anglemod > 360){
        anglemod = anglemod % 360;
      }
-     
+
     for (LXPoint p: model.points) {
       //conveniently, hue is on a scale of 0-360
       hoo=((atan(p.x/p.z))*360/PI+anglemod);
@@ -305,7 +305,7 @@ public class GradientPattern extends LXPattern {
   public GradientPattern(LX lx) {
     super(lx);
   }
-  
+
   public void run(double deltaMs) {
     for (LXPoint p : model.points) {
       colors[p.index] = palette.getColor(p);
@@ -322,7 +322,7 @@ public class BlankPattern extends LXPattern {
   public BlankPattern(LX lx) {
     super(lx);
   }
-  
+
   public void run(double deltaMs) {
     setColors(#000000);
   }
@@ -335,12 +335,12 @@ public class BlankPattern extends LXPattern {
  * A plane bounces up and down the brain, making a circle of color.
  ************************************************************************** */
 public class CircleBounce extends LXPattern {
-  
-  private final BoundedParameter bounceSpeed 
+
+  private final BoundedParameter bounceSpeed
       = new BoundedParameter("BNC",  1000, 0, 10000);
-  private final BoundedParameter colorSpread 
+  private final BoundedParameter colorSpread
       = new BoundedParameter("CLR", 0.0, 0.0, 360.0);
-  private final BoundedParameter colorFade   
+  private final BoundedParameter colorFade
       = new BoundedParameter("FADE", 1, 0.0, 10.0);
 
   public CircleBounce(LX lx) {
@@ -420,7 +420,7 @@ public class StrobePattern extends LXPattern{
       latchedColor =
         lx.hsb(hue.getValuef(), saturation.getValuef(), bright.getValuef());
   }
-  
+
     wasOn = isOn;
     int kolor = isOn? latchedColor : LXColor.BLACK;
     for (LXPoint p : model.points) {
@@ -503,7 +503,7 @@ public class MoireManifoldPattern extends LXPattern{
   }
       }
       }
-      
+
   public MoireManifoldPattern(LX lx) {
     super(lx);
     addParameter(width);
@@ -511,7 +511,7 @@ public class MoireManifoldPattern extends LXPattern{
     addParameter(numGenerators);
     addParameter(numSmooth);
     }
-      
+
   public void setGeneratorCount(int count) {
     while (generators.size() < count) {
       Generator g = new Generator();
@@ -522,7 +522,7 @@ public class MoireManifoldPattern extends LXPattern{
       generators.subList(count, generators.size()).clear();
         }
       }
-      
+
   public void run(double deltaMs) {
     setGeneratorCount(numGenerators.getValuei());
     numSmooth.setRange(0, numGenerators.getValuei() + 1);
@@ -544,11 +544,11 @@ public class MoireManifoldPattern extends LXPattern{
       sumField = (cos(sumField * 2 * PI) + 1)/2;
       colors[p.index] = lx.hsb(0.0, 0.0, sumField * 100);
     }
-      
+
     //for (Generator g : generators) {
     //  colors[g.getOrigin().index] = LXColor.RED;
     //}
-  } 
+  }
 }
 */
 
@@ -641,7 +641,7 @@ public class WaveFrontPattern extends LXPattern {
           return LXColor.hsba(0, 0, 0, 0);
         } else {
             double hoo = baseHue + positionInBand * hueWidth;
-    
+
             // return LXColor.hsba(hoo, Math.min((1 - positionInBand) * 250, 100), Math.min(100, 500 + positionInBand * 100), 1.0);
             return LXColor.hsba(hoo, 100, 100, 1.0);
   }
@@ -684,7 +684,7 @@ public class WaveFrontPattern extends LXPattern {
         kolor = LXColor.blend(kolor, s.colorAtPoint(p), LXColor.Blend.ADD);
       }
       colors[p.index] = kolor;
-   }  
+   }
   }
 }
 */
@@ -695,24 +695,24 @@ public class WaveFrontPattern extends LXPattern {
  * @author: Codey Christensen
  ************************************************************************* **/
 
-/* 
+/*
 public class ColorStatic extends LXPattern {
- 
+
   ArrayList<LXPoint> current_points = new ArrayList<LXPoint>();
   ArrayList<LXPoint> random_points = new ArrayList<LXPoint>();
- 
+
   int i;
   int h;
   int s;
   int b;
- 
+
   private final BoundedParameter number_of_points = new BoundedParameter("PIX",  340, 50, 1000);
   private final BoundedParameter decay = new BoundedParameter("DEC",  0, 5, 100);
   private final BoundedParameter black_and_white = new BoundedParameter("BNW",  0, 0, 1);
-   
+
   private final BoundedParameter color_change_speed = new BoundedParameter("SPD",  205, 0, 360);
   private final SinLFO whatColor = new SinLFO(0, 360, color_change_speed);
-    
+
   public ColorStatic(LX lx){
      super(lx);
      addParameter(number_of_points);
@@ -721,10 +721,10 @@ public class ColorStatic extends LXPattern {
      addParameter(black_and_white);
      addModulator(whatColor).trigger();
   }
-  
+
  public void run(double deltaMs) {
    i = i + 1;
-     
+
    random_points = model.getRandomPoints(int(number_of_points.getValuef()));
 
    for (LXPoint p : random_points) {

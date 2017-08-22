@@ -14,10 +14,6 @@ public static final Dodecahedron dd = new Dodecahedron(RADIUS);
 
 
 
-
-
-
-
 //***************************************************** MAPPING CONFIGURATIONS
 /**
  * Generates the model from indiviual bars, and assigns them to channels.

@@ -17,10 +17,11 @@
 * v0.1 2015.03.21
 * v0.2 2015.08.20 updated for brainlove and DBLX
 * v0.3 2015.11.15 updated MuseHUD to display metrics
+* v0.4 2017.08.21 muse HUD revised for processing3 and p3LX
 *
 * --------------------------------------
 * Requirements:
-* requires oscP5 library package for Processing 2
+* requires oscP5 library package for Processing 3
 *
 * need to have muse-io installed, get SDK from here:
 * https://sites.google.com/a/interaxon.ca/muse-developer-site/download
@@ -44,6 +45,7 @@ class MuseConnect {
   OscP5 oscP5;
   NetAddress remoteOSCLocation;
 
+  // default is to connect to data stream on localhost
   private String host = "127.0.0.1";
   private int port;
 
