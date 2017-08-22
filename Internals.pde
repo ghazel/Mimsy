@@ -40,12 +40,22 @@ UI3dComponent pointCloudTetraRight;
 UI3dComponent uiWalls;
 UI3dComponent uiNodes;
 
+// define Muse globals
+UIMuseControl uiMuseControl;
+// UIMuseHUD uiMuseHUD;
+MuseConnect muse;
+MuseHUD museHUD;
+int MUSE_OSCPORT = 5000;
+boolean museEnabled = false;
+
+
+
 public BooleanParameter uiOrthoCamera = new BooleanParameter("Ortho");
 public BoundedParameter clipNear = new BoundedParameter("Clip Near", 0, 0, 100);
 public BoundedParameter clipFar = new BoundedParameter("Clip Far", 100, 0, 100);
 
 
-// Let's NOT work in inches, but will leave these here for porting 
+// Let's NOT work in inches, but will leave these here for porting
 // patterns that do.
 final static float INCHES = 25.4;
 final static float FEET = 12.0*INCHES;
@@ -65,14 +75,23 @@ void setup() {
 
   startMillis = System.currentTimeMillis();
   lastMillis = startMillis;
-  
-  //==================================================================== Model 
+
+  //==================================================================== Model
   mimsyMap = new MimsyMap(MIMSY_TYPE);
   model = mimsyMap.buildModel();
   out("Model Name: %s\n", model.layer);
   out("Finished Building Model");
-  
-  
+
+  //==================================================== Initialize sensors
+  //initialize the Muse connection
+  // TODO: this should gracefully handle lack of Muse OSC input
+  muse = new MuseConnect(this, MUSE_OSCPORT);
+  println(muse);
+  museHUD = new MuseHUD(muse);
+  println(museHUD);
+  out("added Muse OSC parser and HUD");
+
+
    try {
     lx = new LXStudio(this, model, false) {
       public void initialize(LXStudio lx, LXStudio.UI ui) {
@@ -82,21 +101,32 @@ void setup() {
         // TODO: the UDP output instantiation will go in here!
         out("Initialized LXStudio");
       }
-      
+
       public void onUIReady(LXStudio lx, LXStudio.UI ui) {
         //ui.preview.setRadius(80*FEET).setPhi(-PI/18).setTheta(PI/12);
         //ui.preview.setCenter(0, model.cy - 2*FEET, 0);
-        //ui.preview.addComponent(new UISimulation());       
+        //ui.preview.addComponent(new UISimulation());
         ui.preview.pointCloud.setPointSize(2.0).setVisible(true);
         ui.preview.addComponent(uiBarsDD = new UIBars(((GraphModel)model).getLayer(DD)));
         ui.preview.addComponent(uiBarsTL = new UIBars(((GraphModel)model).getLayer(TL)));
         ui.preview.addComponent(uiBarsTR = new UIBars(((GraphModel)model).getLayer(TR)));
+
+        // Narrow angle lens, for a fuller visualization
+        // ui.preview.perspective.setValue(30);
+
         //ui.preview.pointCloud.setVisible(false); //TODO doesnt work
         uiMimsyControls = (UIMimsyControls) new UIMimsyControls(ui)
-                                              .addToContainer(ui.leftPane.global);     
-        
+                                              .setExpanded(false)
+                                              .addToContainer(ui.leftPane.global);
+
+        // add Muse UI components
+        uiMuseControl = (UIMuseControl) new UIMuseControl(ui, muse, museHUD).setExpanded(true).addToContainer(ui.leftPane.global);
+        // uiMuseHUD = (UIMuseHUD) new UIMuseHUD(ui, museHUD)
+        //                             .setExpanded(true)
+        //                             .addToContainer(ui.leftPane.global);
+
         // Narrow angle lens, for a fuller visualization
-        //ui.preview.perspective.setValue(30);
+        ui.preview.perspective.setValue(30);
 
        // uiTreeControls = (UITreeControls) new UITreeControls(ui).addToContainer(ui.leftPane.global);
         out("Initialized LX UI");
@@ -106,33 +136,33 @@ void setup() {
     x.printStackTrace();
   }
   //end from tenere
-  
+
 
   if (TEST_SYMMETRY) {
     symTest = new SymmetryTest(model);
     symTest.runSymmetryTests();
     exit();
   }
-  
+
   //===================================================================== P3LX
 
   //lx = new LXStudio(this, model, false);
   //anything that extends LXPattern gets loaded automatically now (using reflection)
-  
+
   //lx.setPatterns(patterns(lx));
   //out("Finished Loading Patterns");
-  
+
   //================================================================= 3D Model
-  
+
 
 
   ////-------------- Prepare 3D Reference Elements
   //uiWalls = new UIWalls();
   //uiWalls.setVisible(false);
   //uiNodes = new UINodes();
-  
+
   ////-------------- Prepare 3D Point Clouds
-  //pointCloudDodecahedron 
+  //pointCloudDodecahedron
   //  = new UIPointCloud(lx, model.getLayer(DD))
   //        .setPointSize(DODECAHEDRON_BAR_THICKNESS);
   //pointCloudTetraLeft
@@ -144,8 +174,8 @@ void setup() {
 
 
   ////-------------- Build the 3D UI
-  //uiContext = 
-  //  // A camera layer makes an OpenGL layer that we can easily 
+  //uiContext =
+  //  // A camera layer makes an OpenGL layer that we can easily
   //  // pivot around with the mouse
   //  new UI3dContext(lx.ui) {
 
@@ -169,10 +199,10 @@ void setup() {
   //          }
   //        }
   //      }
-  
+
   //      int scale = 6;
   //      if (uiOrthoCamera.isOn()) {
-  //        ortho(-width/scale, width/scale, 
+  //        ortho(-width/scale, width/scale,
   //              -height/scale, height/scale,
   //              clipNear.getValuef() * radius.getValuef() / 100.0,
   //              clipFar.getValuef() * radius.getValuef() / 100.0 * 2.0);
@@ -183,9 +213,9 @@ void setup() {
   //      // Turn off the lights and kill depth testing before the 2D layers
   //      noLights();
   //      hint(DISABLE_DEPTH_TEST);
-  //    } 
+  //    }
   //  }
-  
+
   //  //------------ Camera!
   //  .setRadius(1000)
   //  .setPerspective(0)
@@ -193,7 +223,7 @@ void setup() {
   //  .setCenter(model.cx, model.cy, model.cz)
   //  //.setPhi(-PI/2) // Rotate model around X
   //  //.setTheta(-PI/2) // Rotate around Y
-    
+
 
   //  //------------ Action! (actually just some stuff)
   //  // Let's add a point cloud of our animation points
@@ -208,7 +238,7 @@ void setup() {
 
   //lx.ui.addLayer(uiContext);
   //out("Finished 3D Layer");
-  
+
   ////=========================================================== 2D Control GUI
   //UI2dContext[] layers = new UI2dContext[] {
   //  // Left Side
@@ -220,13 +250,13 @@ void setup() {
   //  // Right Side
   //  new UIComponentsDemo   (lx.ui,                          width-144, 4),
   //};
-  
+
   //for (UI2dContext layer : layers) {
   //  lx.ui.addLayer(layer);
   //}
 
 
-  
+
   out("Finished 2D Layer");
 
 
@@ -237,8 +267,8 @@ void setup() {
     buildOutputs();
     out("Built output clients");
   }
-  
-  
+
+
 
 }
 
@@ -255,7 +285,7 @@ void draw() {
   // for better representation of dynamic range
   //
   /*
-  color[] sendColors = lx.getColors();  
+  color[] sendColors = lx.getColors();
   float hsb[] = new float[3];
   for (int i = 0; i < sendColors.length; ++i) {
     LXColor.RGBtoHSB(sendColors[i], hsb);
@@ -269,16 +299,16 @@ void draw() {
 
 
 
-   
+
 //************************************************************ AUX SUBROUTINES
 //------------------------------------------------------------------ FPS Meter
 long simulationNanos = 0;
 static long startMillis = System.currentTimeMillis();
 static long lastMillis = startMillis;
 
-int FPS_TARGET = 60;  
+int FPS_TARGET = 60;
 boolean DRAW_FPS = true;
-void drawFPS() {  
+void drawFPS() {
   if (DRAW_FPS) {
     fill(#FFFFFF);
     textSize(9);
@@ -303,7 +333,7 @@ public static void out(String format, Object... args) {
   String prefix = String.format("%s (%5d ms): ", timeStamp, dif);
   System.out.format(prefix);
   System.out.format(format, args);
-  if (!format.endsWith("\n")) { 
+  if (!format.endsWith("\n")) {
     System.out.format("\n");
   }
   lastMillis = now;

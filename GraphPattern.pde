@@ -1,7 +1,7 @@
 /** Pattern Ideas.
  *
  * Tracers extend from a single node along all bars of dodecahedron.
- * Split and recombine at each node but keep tracing greater graph distance. 
+ * Split and recombine at each node but keep tracing greater graph distance.
  * Color bars/points as a function of graph distance. Sparkle tetrahedra bars
  * whenever getting to a point connecting back to first node (i.e. at graph
  * distance 3). Color Tetrahedra by lerp from node colors.
@@ -16,14 +16,14 @@ public abstract class GraphPattern extends LXPattern {
 
   public GraphPattern(LX lx) {
     super(lx);
-    this.model = (GraphModel) lx.model;    
+    this.model = (GraphModel) lx.model;
   }
 
   public void fade(LXPoint[] points, float fade) {
     for (LXPoint p : points) {
       colors[p.index] =
         LXColor.scaleBrightness(colors[p.index], fade);
-    }      
+    }
   }
 
 
@@ -39,23 +39,23 @@ public abstract class GraphPattern extends LXPattern {
 public class SymmetryPattern extends GraphPattern {
 
   /*
-  private final BoundedParameter barRate 
+  private final BoundedParameter barRate
     = new BoundedParameter("BAR",  5000, 0, 60000);
-  private final BoundedParameter nodeRate 
+  private final BoundedParameter nodeRate
     = new BoundedParameter("NODE",  5000, 0, 60000);
-  private final BoundedParameter faceRate 
+  private final BoundedParameter faceRate
     = new BoundedParameter("FACE",  5000, 0, 60000);
   */
 
 
-  private final BoundedParameter runRate 
+  private final BoundedParameter runRate
     = new BoundedParameter("RUN",  1.0, 0.0, 5.0);
-  private final BoundedParameter spinRate 
+  private final BoundedParameter spinRate
     = new BoundedParameter("SPIN",  100.0, 1.0, 10000.0);
   private final BoundedParameter fadeRate =
     new BoundedParameter("FADE", 0.5, 0.0, 1.0);
   //private final SinLFO barPos = new SinLFO(0.0, 1.0, runRate);
-  
+
   private final BoundedParameter colorSpread
     = new BoundedParameter("dHUE", 30.0, 0.0, 360.0);
   private final BoundedParameter colorSaturation
@@ -75,7 +75,7 @@ public class SymmetryPattern extends GraphPattern {
   // Want the first bar of each tetrahedra
   List<Bar> TLBars = new ArrayList<Bar>();
   List<Bar> TRBars = new ArrayList<Bar>();
-  
+
   LXPoint point;
   double totalMs;
   double lastSpin;
@@ -103,7 +103,7 @@ public class SymmetryPattern extends GraphPattern {
     //addParameter(barRate);
     //addParameter(nodeRate);
     //addParameter(faceRate);
-    
+
     addParameter(runRate);
     addParameter(spinRate);
     addParameter(fadeRate);
@@ -117,12 +117,12 @@ public class SymmetryPattern extends GraphPattern {
 
     barPos = 0.0;
 
-    for (GraphModel g: model.getLayer(TL).subGraphs) { 
+    for (GraphModel g: model.getLayer(TL).subGraphs) {
       tetrahedra.add(g);
       TLModels.add(g);
       TLBars.add(g.bars[0]);
     }
-    for (GraphModel g: model.getLayer(TR).subGraphs) { 
+    for (GraphModel g: model.getLayer(TR).subGraphs) {
       tetrahedra.add(g);
       TRModels.add(g);
       TRBars.add(g.bars[0]);
@@ -146,7 +146,7 @@ public class SymmetryPattern extends GraphPattern {
     hue = (hue + dHue * (float)deltaMs / 1000.0) % 360.0;
 
 
-    float delayReset = 60000; 
+    float delayReset = 60000;
     // Reset symmetry
     if ((totalMs - lastReset) > delayReset) {
       sym.reset();
@@ -205,7 +205,7 @@ public class SymmetryPattern extends GraphPattern {
 
 
 public class SymmetryTestPattern extends GraphPattern {
-  private final BoundedParameter cycleSpeed 
+  private final BoundedParameter cycleSpeed
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
       = new BoundedParameter("dHUE", 30.0, 0.0, 360.0);
@@ -262,7 +262,7 @@ public class SymmetryTestPattern extends GraphPattern {
     Element symNodeE;
     diffMs += deltaMs;
     totalMs += deltaMs;
-    
+
 
     // Switch nodes every 30 seconds
     if ((totalMs - lastSwitch) > 30000) {
@@ -287,9 +287,9 @@ public class SymmetryTestPattern extends GraphPattern {
       toggle = !toggle;
       diffMs = 0.0;
     }
-    
+
     /*
-    for (int i = 0; i < colors.length; i++) { 
+    for (int i = 0; i < colors.length; i++) {
       colors[i] = lx.hsb(0.0, 0.0, 0.0);
     }
     */
@@ -334,7 +334,7 @@ public class SymmetryTestPattern extends GraphPattern {
  ****************************************************************************/
 
 public class TetraBarTest extends GraphPattern {
-  private final BoundedParameter cycleSpeed 
+  private final BoundedParameter cycleSpeed
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
       = new BoundedParameter("dHUE", 30.0, 0.0, 360.0);
@@ -369,7 +369,7 @@ public class TetraBarTest extends GraphPattern {
     float hue = 0.;
     float sat = 0.;
     float brt = 0.;
-    
+
     float dHue = colorSpread.getValuef();
     float bSat = colorSaturation.getValuef();
     float dSat = colorSaturationRange.getValuef();
@@ -378,7 +378,7 @@ public class TetraBarTest extends GraphPattern {
 
     baseHue += Math.log(cycleSpeed.getValuef());
     baseHue %= 360.;
-    
+
     for (int t = 0; t<tetrahedra.size(); t++) {
       GraphModel tetra = tetrahedra.get(t);
       float db = dBrt / (float)tetra.bars.length ;
@@ -406,7 +406,7 @@ public class TetraBarTest extends GraphPattern {
  ****************************************************************************/
 
 public class TetrahedronTest extends GraphPattern {
-  private final BoundedParameter cycleSpeed 
+  private final BoundedParameter cycleSpeed
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
       = new BoundedParameter("dHUE", 30.0, 0.0, 360.0);
@@ -441,7 +441,7 @@ public class TetrahedronTest extends GraphPattern {
     float hue = 0.;
     float sat = 0.;
     float brt = 0.;
-    
+
     float dHue = colorSpread.getValuef();
     float bSat = colorSaturation.getValuef();
     float dSat = colorSaturationRange.getValuef();
@@ -450,7 +450,7 @@ public class TetrahedronTest extends GraphPattern {
 
     baseHue += Math.log(cycleSpeed.getValuef());
     baseHue %= 360.;
-    
+
     for (int t = 0; t<tetrahedra.size(); t++) {
       if (t>=2 && t<5) { continue; }
       if (t>=7 && t<10) { continue; }
@@ -486,7 +486,7 @@ public class TetrahedronTest extends GraphPattern {
 public class TetrahedronTest extends LXPattern {
   private final BoundedParameter colorSpread
       = new BoundedParameter("CLR", 60.0, 0.0, 360.0);
-  private final BoundedParameter cycleSpeed 
+  private final BoundedParameter cycleSpeed
       = new BoundedParameter("SPD",  1., 0., 20.);
   //private final ColorParameter clr
   //    = new ColorParameter("COLOR", LXColor.hsb(Math.random() * 360, 100, 100));
@@ -512,10 +512,10 @@ public class TetrahedronTest extends LXPattern {
     int pixel = 0;
     float hue = 0.0;
     baseHue += Math.log(cycleSpeed.getValuef());
-    baseHue %= 360.;    
+    baseHue %= 360.;
     for (int channel = 0; channel < channelCount; channel++) {
       hue = (float)channel * (float)colorSpread.getValue() + baseHue;
-      for (int p = 0; p < pixelsPerChannel; p++) { 
+      for (int p = 0; p < pixelsPerChannel; p++) {
         colors[pixel++] = lx.hsb(hue,100.,30.);
       }
     }
@@ -574,7 +574,7 @@ public class MappingTetrahedron extends GraphPattern {
         colors[p.index] = lx.hsb(hue,baseSat,baseBrt);
         hue += dHue;
       }
-    }    
+    }
   }
 }
 
@@ -638,16 +638,16 @@ public class MappingDodecahedron extends GraphPattern {
  ****************************************************************************/
 
 public class TestBarMatrix extends GraphPattern {
-  
+
   private final DiscreteParameter method = new DiscreteParameter("GEN", 1, 1, 5);
   private final BoundedParameter speed = new BoundedParameter("SPD",  5000, 0, 10000);
   private final BoundedParameter fadeRate =
     new BoundedParameter("FADE", 10.0, 0.0, 1000.0);
 
-  //private final SinLFO xPeriod = new SinLFO(100, 1000, 10000); 
+  //private final SinLFO xPeriod = new SinLFO(100, 1000, 10000);
   private final SinLFO position = new SinLFO(0.0, 1.0, speed);
-  
-  
+
+
   float thisPos = 0.0;
   float lastPos = 0.0;
   float hueRange = 270.f;
@@ -682,7 +682,7 @@ public class TestBarMatrix extends GraphPattern {
     fade(model.points, fadeRate.getValuef() * (float)deltaMs / 1000.0);
 
     int M = method.getValuei();
-    
+
     // Chase up one bar and back down its reverse
     if (M == 1) {
       int i, s;
@@ -690,7 +690,7 @@ public class TestBarMatrix extends GraphPattern {
         Bar bar = _bar;
         s = bar.points.length;
         i = LXUtils.constrain((int)((float)s * thisPos), 0, s-1);
-        if (rev) { 
+        if (rev) {
           bar = _bar.reversed();
           hue = 270.0;
           i = s-i-1;
@@ -699,7 +699,7 @@ public class TestBarMatrix extends GraphPattern {
         //  bar.node1.index, bar.node2.index, rev, thisPos, s, i);
         colors[bar.points[i].index] = lx.hsb(hue,sat,brt);
       }
-    
+
     // Chase up one bar and back down its reverse by looking it up in barMatrix
     } else if (M == 2) {
       int i, s;
@@ -707,7 +707,7 @@ public class TestBarMatrix extends GraphPattern {
         Bar bar = _bar;
         s = bar.points.length;
         i = LXUtils.constrain((int)((float)s * thisPos), 0, s-1);
-        if (rev) { 
+        if (rev) {
           bar = model.getBar(bar.node2, bar.node1);
           hue = 270.0;
           i = s-i-1;
@@ -716,17 +716,17 @@ public class TestBarMatrix extends GraphPattern {
         //  bar.node1.index, bar.node2.index, rev, thisPos, s, i);
         colors[bar.points[i].index] = lx.hsb(hue,sat,brt);
       }
-     
+
     // Color by bar direction
     } else if (M == 3) {
       for (Bar bar : model.bars) {
         if (bar.node1.index < bar.node2.index) {
           for (LXPoint p: bar.points) {
-            colors[p.index]= lx.hsb(0.0, baseSat, baseBrt); 
+            colors[p.index]= lx.hsb(0.0, baseSat, baseBrt);
           }
         } else {
           for (LXPoint p: bar.points) {
-            colors[p.index]= lx.hsb(180.0, baseSat, baseBrt); 
+            colors[p.index]= lx.hsb(180.0, baseSat, baseBrt);
           }
         }
       }
@@ -759,7 +759,7 @@ public class TestBarMatrix extends GraphPattern {
 
 public class TetraSymmetryFace extends GraphPattern {
 
-  private final BoundedParameter cycleSpeed 
+  private final BoundedParameter cycleSpeed
       = new BoundedParameter("SPD",  5.0, 1.0, 100.0);
   private final BoundedParameter colorSpread
       = new BoundedParameter("dHUE", 30.0, 0.0, 360.0);
@@ -793,7 +793,7 @@ public class TetraSymmetryFace extends GraphPattern {
     float hue = 0.;
     float sat = 0.;
     float brt = 0.;
-    
+
     float dHue = colorSpread.getValuef();
     float bSat = colorSaturation.getValuef();
     float dSat = colorSaturationRange.getValuef();
@@ -802,7 +802,7 @@ public class TetraSymmetryFace extends GraphPattern {
 
     baseHue += Math.log(cycleSpeed.getValuef());
     baseHue %= 360.;
-    
+
     for (int t = 0; t<tetrahedra.size(); t++) {
       GraphModel tetra = tetrahedra.get(t);
       float db = dBrt / (float)tetra.bars.length ;
@@ -827,7 +827,7 @@ public class TetraSymmetryFace extends GraphPattern {
 
 
 /** ************************************************************ PIXIE PATTERN
- * Points of light that chase along the edges.
+ * Pixies: points of light that chase along the edges.
  *
  * More ideas for later:
  * - Scatter/gather (they swarm around one point, then fly by
@@ -836,6 +836,8 @@ public class TetraSymmetryFace extends GraphPattern {
  * - Multiple colors (maybe just a few in a different color)
  *
  * @author Geoff Schmiddt
+ *
+ * @author Mike Pesavento, adding EEG mapping to parameters, heavy edits
  ************************************************************************* **/
 
 public class PixiePattern extends GraphPattern {
@@ -844,11 +846,11 @@ public class PixiePattern extends GraphPattern {
       new BoundedParameter("NUM", 100, 0, 1000);
   // How fast each pixie moves, in pixels per second.
   private final BoundedParameter speed =
-      new BoundedParameter("SPD", 60.0, 10.0, 1000.0);
+      new BoundedParameter("SPD", 50.0, 10.0, 150.0);
   // How long the trails persist. (Decay factor for the trails, each frame.)
   // XXX really should be scaled by frame time
   private final BoundedParameter fade =
-      new BoundedParameter("FADE", 0.9, 0.8, .99);
+      new BoundedParameter("FADE", 0.9, 0.8, .97);
   // Brightness adjustment factor.
   private final BoundedParameter brightness =
       new BoundedParameter("BRIGHT", 1.0, .25, 2.0);
@@ -862,6 +864,7 @@ public class PixiePattern extends GraphPattern {
     public int kolor;
 
     public Pixie() {
+      // Nothing to do in here, just a holder for attributes
     }
   }
   private ArrayList<Pixie> pixies = new ArrayList<Pixie>();
@@ -882,7 +885,7 @@ public class PixiePattern extends GraphPattern {
     for (Pixie p : this.pixies) {
       p.kolor = lx.hsb(colorHue.getValuef(), colorSat.getValuef(), 100);
     }
-      
+
     while (this.pixies.size() < count) {
       Pixie p = new Pixie();
       p.fromNode = model.getRandomNode();
@@ -894,22 +897,24 @@ public class PixiePattern extends GraphPattern {
     if (this.pixies.size() > count) {
       this.pixies.subList(count, this.pixies.size()).clear();
     }
-  } 
+  }
 
   public void run(double deltaMs) {
     this.setPixieCount(Math.round(numPixies.getValuef()));
     //    System.out.format("FRAME %.2f\n", deltaMs);
     float fadeRate = 0;
     float speedRate = 0;
-    /*
-    if (museActivated) {
-      fadeRate = map(muse.getMellow(), 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
-      speedRate = map(muse.getConcentration(), 0.0, 1.0, (float)20.0, 300);
+
+    if (museEnabled) {
+      // NOTE: this usually uses getMellow() and getConcentration(), but
+      // recent versions of muse-io look like they don't catch those values any longer :(
+      fadeRate = map(muse.getAlpha(), 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
+      speedRate = map(muse.getGamma(), 0.0, 1.0, (float)speed.range.min, (float)speed.range.max);
     }
     else {
-    */
       fadeRate = fade.getValuef();
       speedRate = speed.getValuef();
+    }
 
     for (LXPoint p : model.points) {
      colors[p.index] =
