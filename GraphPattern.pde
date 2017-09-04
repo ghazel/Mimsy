@@ -908,8 +908,13 @@ public class PixiePattern extends GraphPattern {
     if (museEnabled) {
       // NOTE: this usually uses getMellow() and getConcentration(), but
       // recent versions of muse-io look like they don't catch those values any longer :(
-      fadeRate = map(muse.getAlpha(), 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
-      speedRate = map(muse.getGamma(), 0.0, 1.0, (float)speed.range.min, (float)speed.range.max);
+      // calm = muse.getTheta()/muse.getAlpha();
+      // attention = muse.getBeta()/muse.getAlpha();
+      //  // Placeholders, use these for now?
+      calm = muse.getAlpha();
+      attention = muse.getGamma();
+      fadeRate = map(calm, 0.0, 1.0, (float)fade.range.min, (float)fade.range.max);
+      speedRate = map(attention, 0.0, 1.0, (float)speed.range.min, (float)speed.range.max);
     }
     else {
       fadeRate = fade.getValuef();
