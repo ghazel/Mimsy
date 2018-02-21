@@ -995,6 +995,8 @@ public class PixiePattern extends GraphPattern {
     //    System.out.format("FRAME %.2f\n", deltaMs);
     float fadeRate = 0;
     float speedRate = 0;
+    float calm;
+    float attention;
 
     if (museEnabled) {
       // NOTE: this usually uses getMellow() and getConcentration(), but
