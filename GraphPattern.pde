@@ -1068,4 +1068,90 @@ public class PixiePattern extends GraphPattern {
 }
 
 
+public class STLeporter extends GraphPattern {
 
+  float minX;
+  float maxX;
+  float minY;
+  float maxY;
+  float minZ;
+  float maxZ;
+
+  TriangleMesh mesh;
+
+  public STLeporter(LX lx) {
+    super(lx);
+
+    minX = 0;
+    maxX = 0;
+    minY = 0;
+    maxY = 0;
+    minZ = 0;
+    maxZ = 0;
+    int total = 0;
+    for (Bar bar: model.bars) {
+      for (LXPoint p: bar.points) {
+        // lulz
+        minX = Math.min(minX, p.x);
+        maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y);
+        maxY = Math.max(maxY, p.y);
+        minZ = Math.min(minZ, p.z);
+        maxZ = Math.max(maxZ, p.z);
+      }
+      total += bar.points.length;
+    }
+    out("total:%d minX:%f maxX:%f minY:%f maxY:%f minZ:%f maxZ:%f", total, minX, maxX, minY, maxY, minZ, maxZ);
+    // The teapot is not relevant in the domain of the space it creates because no one lives inside a teapot, we are outside of them
+    mesh = (TriangleMesh)new STLReader().loadBinary(sketchPath("teapot.stl"), STLReader.TRIANGLEMESH);
+    AABB aabb = mesh.getBoundingBox();
+    out("mesh:%s aabb:%s", mesh, aabb);
+    float xf = aabb.getMax().x - aabb.getMin().x;
+    float yf = aabb.getMax().y - aabb.getMin().y;
+    float zf = aabb.getMax().z - aabb.getMin().z;
+    float scale = (maxX - minX) / xf;
+    mesh.scale(scale * 0.8);
+    mesh.center(new Vec3D(0, 0, 0));
+    out("mesh:%s aabb:%s", mesh, aabb);
+  }
+
+  Vec3D pointToVec(LXPoint p) {
+    return new Vec3D(p.x, p.y, p.z);
+  }
+
+  public void run(double deltaMs) {
+    runSphoxel(deltaMs);
+  }
+
+  void runSphoxel(double deltaMs) {
+    for (LXPoint p : model.points) {
+      colors[p.index] = LXColor.BLACK;
+    }
+
+    Triangle3D tri = new Triangle3D();
+    Sphere sphoxel = new Sphere(60);
+    Vec3D nearby = new Vec3D();
+    for (Bar bar: model.bars) {
+      // lazy
+      AABB barbox = AABB.fromMinMax(pointToVec(bar.points[0]), pointToVec(bar.points[bar.points.length - 1]));
+      for (Face f : mesh.getFaces()) {
+        tri.a = f.a;
+        tri.b = f.b;
+        tri.c = f.c;
+        if (barbox.intersectsTriangle(tri)) {
+          for (LXPoint p: bar.points) {
+            sphoxel.set(p.x, p.y, p.z);
+            if (sphoxel.intersectSphereTriangle(tri, nearby)) {
+              float d = nearby.distanceTo(sphoxel);
+              // max() is lame. intersection volume would be better
+              colors[p.index] = Math.max(colors[p.index], LXColor.scaleBrightness(LXColor.RED + LXColor.BLUE, 1 - (d/sphoxel.radius)));
+            }
+          }
+        }
+      }
+    }
+    mesh.rotateZ((float)(deltaMs / 3000.0));
+    //mesh.rotateY((float)(deltaMs / 300.0));
+    //mesh.rotateX((float)(deltaMs / 300.0));
+  }
+}
